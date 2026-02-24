@@ -1399,8 +1399,10 @@
                         isHeliOn = true;
                         showMsg("Helicóptero: Espaço sobe, Shift desce, WASD inclina, Mouse gira");
                     } else {
-                        // Sincroniza o yaw do mouse com a rotação atual do carro
-                        yaw = closest.mesh.rotation.y;
+                        // Calcula yaw diretamente a partir do vetor de direção do carro (c.dir)
+                        // Convenção: -Z = frente (mesma do jogador a pé e do lookAt do Three.js)
+                        yaw = Math.atan2(-closest.dir.x, -closest.dir.z);
+
                         showMsg("Carro: Mouse gira, WASD controla. Vel. max 120km/h");
                         document.getElementById('crosshair').style.display = 'block';
                     }
@@ -1736,34 +1738,48 @@
 
             } else if (currentVehicle) {
                 // Controle Carro do Player
-                let cv = currentVehicle; // obj com dir, mesh, speed
-                // Simples tank controls para o carro do player
-                if (keys.w) cv.speed = Math.min(cv.maxSpeed * 3, cv.speed + 20 * dt); // até ~120
+                let cv = currentVehicle;
+
+                // Aceleração / Frenagem
+                if (keys.w) cv.speed = Math.min(cv.maxSpeed * 3, cv.speed + 20 * dt);
                 else if (keys.s) cv.speed = Math.max(-10, cv.speed - 20 * dt);
                 else cv.speed *= 0.9;
 
-                // Mouse esquerda/direita gira o carro (igual ao heli)
-                cv.mesh.rotation.y = yaw;
-                // A/D também giram (somam ao yaw para controle duplo)
+                // A/D giram o carro (mouse também altera yaw via mousemove)
                 if (keys.a) yaw += 2 * dt;
                 if (keys.d) yaw -= 2 * dt;
 
-                // Atualiza display velocimetro (28) (120 km/h = ~ 33.3 u/s cap)
+                // Direção de frente: -Z rotacionado pelo yaw (mesma convenção do jogador a pé)
+                let cvFwd = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+
+                // Aplica rotação visual ao mesh: lookAt na direção da frente
+                cv.mesh.lookAt(cv.mesh.position.clone().add(cvFwd));
+
+                // Velocímetro
                 let kmh = Math.floor(Math.abs(cv.speed) * 3);
                 document.getElementById('speedometer').innerText = `${kmh} km/h`;
 
-                let cvFwd = new THREE.Vector3(0, 0, 1).applyQuaternion(cv.mesh.quaternion);
+                // Movimento
                 let oldCP = cv.mesh.position.clone();
                 cv.mesh.position.addScaledVector(cvFwd, cv.speed * dt);
 
-                // Colisão parede
+                // Colisão parede / Bounce effect
                 let cBox = new THREE.Box3().setFromObject(cv.mesh);
-                collidables.forEach(c => {
+                let hitWall = false;
+                for (let c of collidables) {
                     if (checkCollision(cBox, c)) {
-                        cv.mesh.position.copy(oldCP);
-                        cv.speed = 0;
+                        hitWall = true;
+                        break;
                     }
-                });
+                }
+
+                if (hitWall) {
+                    cv.mesh.position.copy(oldCP);
+                    let bounceDir = cv.speed > 0 ? -1 : 1;
+                    cv.mesh.position.addScaledVector(cvFwd, bounceDir * 1.5);
+                    cv.speed = -cv.speed * 0.5;
+                    if (Math.abs(cv.speed) > 5) showMsg("BATEU!");
+                }
 
                 // 26) Bater carro -> outro explode
                 cars.forEach((cc, idx) => {
@@ -1799,17 +1815,25 @@
                     // Camera segue a rotação do veículo no modo interno, mais o mouse
                     camera.rotation.set(pitch, yaw, 0, 'YXZ');
                 } else {
-                    // 3ª Pessoa carro/heli - câmera segue a rotação do veículo (e o pitch do mouse)
-                    let vYaw = (currentVehicle === heli) ? yaw : vMesh.rotation.y;
-                    // Pro carro (-10) fica atrás, pro heli usaremos (+10) pq o yaw dele é invertido em relação à malha
-                    let zOffset = (currentVehicle === heli) ? 10 : -10;
-
-                    // Começa com o offset base (trás e cima)
-                    let offset = new THREE.Vector3(0, 5, zOffset);
-                    // Aplica o pitch (olhar para cima/baixo com o mouse)
-                    offset.applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch);
-                    // Aplica o yaw (rotação do veiculo/mouse livre)
-                    offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), vYaw);
+                    // 3ª Pessoa carro/heli
+                    let offset;
+                    if (currentVehicle === heli) {
+                        // Heli: usa yaw normalmente
+                        offset = new THREE.Vector3(0, 5, 10);
+                        offset.applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch);
+                        offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+                    } else {
+                        // Carro: câmera atrás do carro
+                        // Frente = (-sin(yaw), 0, -cos(yaw)), então atrás = (sin(yaw), 0, cos(yaw))
+                        let backX = Math.sin(yaw);
+                        let backZ = Math.cos(yaw);
+                        offset = new THREE.Vector3(backX * 10, 5, backZ * 10);
+                        // Aplica o pitch subindo/descendo a câmera ao olhar para cima/baixo
+                        let right = new THREE.Vector3(backZ, 0, -backX);
+                        let pitchOffset = offset.clone();
+                        pitchOffset.applyAxisAngle(right, -pitch);
+                        offset = pitchOffset;
+                    }
 
                     camera.position.copy(vMesh.position).add(offset);
                     camera.lookAt(vMesh.position);
