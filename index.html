@@ -270,6 +270,44 @@
             margin-right: 8px;
             border-bottom: 2px solid #800;
         }
+
+        /* Menu de Configuração */
+        #configScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #222;
+            padding: 30px;
+            border-radius: 10px;
+            border: 4px solid #fff;
+            color: #fff;
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            font-family: sans-serif;
+            text-shadow: none;
+            /* Override press start font */
+            min-width: 300px;
+        }
+
+        #configScreen h2 {
+            margin-top: 0;
+        }
+
+        #configScreen input[type="password"] {
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #configScreen button {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -293,6 +331,24 @@
         </div>
 
         <button id="startBtn">JOGAR</button>
+        <button id="openConfigBtn"
+            style="margin-top: 15px; padding: 10px 20px; cursor: pointer; background: #555; color: #fff; border: 2px solid #fff; font-family: 'Press Start 2P', cursive; font-size: 12px; transition: all 0.1s; box-shadow: 4px 4px 0px #000; text-shadow: 2px 2px 0px #000;">CONFIGURAÇÕES</button>
+    </div>
+
+    <!-- Config Screen -->
+    <div id="configScreen">
+        <h2>Configurações do Jogo</h2>
+        <label>
+            <input type="checkbox" id="npcModeToggle"> Modo NPC (IA Gemini)
+        </label>
+        <div>
+            <label style="display:block; margin-bottom:5px;">Chave API Gemini:</label>
+            <input type="password" id="geminiApiKey" placeholder="Sua API Key">
+        </div>
+        <button id="clearHistoryBtn" style="background:#f00; color:#fff; border:none; margin-top: 10px;">Limpar
+            Histórico de Conversas</button>
+        <button id="closeConfigBtn" style="background:#0a0; color:#fff; border:none; margin-top: 10px;">Salvar e
+            Fechar</button>
     </div>
 
     <div id="hud">
@@ -302,6 +358,11 @@
             <div>Tempo: <span id="time">10:00</span> <input type="checkbox" id="timerToggle" checked
                     style="pointer-events: auto;"> Ativo</div> <!-- 8) Tempo desativável -->
         </div>
+
+        <!-- ⚙️ Botão de Admin -->
+        <button id="adminBtn"
+            style="position: absolute; top: 10px; right: 10px; padding: 10px; background: #333; color: #fff; border: 2px solid #555; border-radius: 50%; font-size: 20px; cursor: pointer; pointer-events: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.5);"
+            title="Painel de Administrador">⚙️</button>
 
         <!-- 10) HUD mapa -->
         <div id="minimapContainer">
@@ -328,21 +389,101 @@
     <!-- Celular UI -->
     <div id="phoneScreen"
         style="display: none; position: absolute; bottom: 20px; right: 20px; width: 320px; height: 500px; background: #222; border-radius: 20px; border: 4px solid #555; z-index: 200; flex-direction: column; overflow: hidden; font-family: sans-serif; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
-        <div
-            style="background: #111; color: white; padding: 15px; text-align: center; font-weight: bold; border-bottom: 2px solid #444;">
-            Celular (Aperte C para fechar)</div>
-        <div id="phoneLogs"
-            style="flex: 1; background: #e0e0e0; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
-            <div style="font-size: 12px; color: #666; text-align: center;">Envie mensagem para um NPC</div>
-        </div>
-        <div style="padding: 10px; background: #ccc; display: flex; flex-direction: column; gap: 8px;">
-            <input type="text" id="phoneTarget" placeholder="Número do NPC (ex: 1234)"
-                style="padding: 8px; border-radius: 5px; border: 1px solid #999; pointer-events: auto;">
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="phoneMsg" placeholder="Mensagem..."
+
+        <!-- Agenda View -->
+        <div id="agendaView" style="display: flex; flex-direction: column; width: 100%; height: 100%;">
+            <div
+                style="background: #111; color: white; padding: 15px; text-align: center; font-weight: bold; border-bottom: 2px solid #444;">
+                Contatos (C para fechar)
+            </div>
+            <div style="padding: 10px; background: #ccc; display: flex; gap: 5px;">
+                <input type="text" id="addContactPhone" placeholder="Número (ex: 42)"
                     style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #999; pointer-events: auto;">
-                <button id="phoneSendBtn"
-                    style="padding: 8px 15px; background: #0a0; color: white; border: none; border-radius: 5px; cursor: pointer; pointer-events: auto; font-weight: bold;">Enviar</button>
+                <button id="addContactBtn"
+                    style="padding: 8px; background: #00f; color: white; border: none; border-radius: 5px; cursor: pointer; pointer-events: auto; font-weight: bold;">Salvar</button>
+            </div>
+            <div id="contactsList"
+                style="flex: 1; background: #e0e0e0; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;">
+                <!-- Lista de contatos vai aqui -->
+            </div>
+        </div>
+
+        <!-- Chat View -->
+        <div id="chatView" style="display: none; flex-direction: column; width: 100%; height: 100%;">
+            <div
+                style="background: #111; color: white; padding: 15px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; border-bottom: 2px solid #444;">
+                <button id="backToAgendaBtn"
+                    style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; pointer-events: auto;">&lt;
+                    Voltar</button>
+                <div id="chatTitle">Chat</div>
+                <div style="width: 50px;"></div> <!-- Espaçador para alinhamento -->
+            </div>
+            <div id="phoneLogs"
+                style="flex: 1; background: #e0e0e0; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                <div style="font-size: 12px; color: #666; text-align: center;">Inicie a conversa</div>
+            </div>
+            <!-- O input de telefone agora é invisível, só serve de lógica interna se necessário ou removemos de vez -->
+            <input type="hidden" id="phoneTarget">
+            <div style="padding: 10px; background: #ccc; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="phoneMsg" placeholder="Mensagem..."
+                        style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #999; pointer-events: auto;">
+                    <button id="phoneSendBtn"
+                        style="padding: 8px 15px; background: #0a0; color: white; border: none; border-radius: 5px; cursor: pointer; pointer-events: auto; font-weight: bold;">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Admin Debug Panel -->
+    <div id="adminScreen"
+        style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 500px; background: #222; border-radius: 10px; border: 4px solid #f0a; z-index: 300; flex-direction: column; overflow: hidden; font-family: monospace; box-shadow: 0 10px 40px rgba(0,0,0,0.8); color: #fff;">
+        <div
+            style="background: #111; padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f0a;">
+            <h3 style="margin:0; color: #f0a;">Painel de Controle (Admin)</h3>
+            <button id="closeAdminBtn"
+                style="background: transparent; color: #fff; border: none; font-size: 20px; cursor: pointer; pointer-events: auto;">X</button>
+        </div>
+
+        <!-- Admin: Lista de NPCs com Histórico -->
+        <div id="adminListView"
+            style="display: flex; flex-direction: column; flex: 1; padding: 15px; overflow-y: auto;">
+            <p style="margin-top:0; color:#aaa;">Selecione um NPC para inspecionar os logs de chat e alterar a sua
+                personalidade.</p>
+            <div id="adminContactsList" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Preenchido via JS -->
+            </div>
+        </div>
+
+        <!-- Admin: View do Chat e Edição de História -->
+        <div id="adminChatView" style="display: none; flex-direction: row; flex: 1; overflow: hidden;">
+            <!-- Lado Esquerdo: Chat Logs (Somente Leitura) -->
+            <div
+                style="flex: 1; display: flex; flex-direction: column; border-right: 2px solid #555; overflow: hidden;">
+                <div
+                    style="background: #333; padding: 8px; font-weight: bold; text-align: center; display: flex; align-items: center;">
+                    <button id="adminBackBtn"
+                        style="background: #555; color: white; border: none; padding: 5px; border-radius: 3px; cursor: pointer; pointer-events: auto; margin-right: 10px;">&lt;
+                        Voltar</button>
+                    Histórico de Mensagens
+                </div>
+                <div id="adminLogs"
+                    style="flex: 1; padding: 10px; overflow-y: auto; background: #1a1a1a; display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+                </div>
+            </div>
+
+            <!-- Lado Direito: Editar Personalidade -->
+            <div style="flex: 1; display: flex; flex-direction: column; padding: 10px;">
+                <h4 style="margin:0 0 10px 0;">Editar Personalidade: <span id="adminNpcName" style="color:#f0a;">Nome do
+                        NPC</span></h4>
+                <input type="hidden" id="adminTargetPhone">
+                <textarea id="adminBackstoryInput"
+                    style="flex: 1; padding: 10px; background: #333; color: #fff; border: 1px solid #555; border-radius: 5px; resize: none; pointer-events: auto;"
+                    placeholder="Digite aqui a nova história..."></textarea>
+                <button id="adminSaveConfigBtn"
+                    style="margin-top: 10px; padding: 10px; background: #0a0; color: white; border: none; font-weight: bold; border-radius: 5px; cursor: pointer; pointer-events: auto;">Salvar
+                    Nova História</button>
             </div>
         </div>
     </div>
@@ -407,6 +548,41 @@
         const matPants = new THREE.MeshLambertMaterial({ color: 0x0000ff });
 
         const geomBox = new THREE.BoxGeometry(1, 1, 1);
+
+        // --- Configurações NPC e Gemini ---
+        let npcMode = localStorage.getItem('npcMode') === 'true';
+        let geminiApiKey = ''; // Apenas em memória na variável global ou pega direto do input no fetch (como já fazemos)
+        document.getElementById('npcModeToggle').checked = npcMode;
+        // document.getElementById('geminiApiKey').value fica vazio no reload por segurança.
+
+        document.getElementById('openConfigBtn').addEventListener('click', () => {
+            document.getElementById('configScreen').style.display = 'flex';
+        });
+        document.getElementById('closeConfigBtn').addEventListener('click', () => {
+            npcMode = document.getElementById('npcModeToggle').checked;
+            localStorage.setItem('npcMode', npcMode);
+
+            // Agora a key fica salva no storage ao invés de limpar
+            let apiKeyInput = document.getElementById('geminiApiKey').value.trim();
+            if (apiKeyInput) {
+                localStorage.setItem('geminiApiKey', apiKeyInput);
+            }
+
+            document.getElementById('configScreen').style.display = 'none';
+        });
+        document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja apagar o histórico de todas as conversas?')) {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('chatHistory_')) localStorage.removeItem(key);
+                });
+                localStorage.removeItem('phoneContacts');
+                if (typeof renderContacts === "function") {
+                    phoneContacts = [];
+                    renderContacts();
+                }
+                alert('Histórico e agenda limpos!');
+            }
+        });
 
         // --- Game State ---
         let isPlaying = false;
@@ -823,9 +999,6 @@
             }
 
             // ESC com celular aberto: fecha celular igual ao C, sem pausar
-            // O navegador vai soltar o PointerLock automaticamente ao apertar ESC (regra do browser),
-            // mas a flag closingPhone vai impedir que o jogo pause.
-            // O próximo clique do mouse vai re-prender o PointerLock.
             if (e.key === 'Escape' && phoneOpen) {
                 closingPhone = true;
                 phoneOpen = false;
@@ -833,20 +1006,27 @@
                 return;
             }
 
+            // ESC com Admin Panel aberto: fecha o painel admin
+            if (e.key === 'Escape' && adminOpen) {
+                closingPhone = true; // reaproveitamos a flag pra evitar o pause instantâneo
+                closeAdminPanel();
+                return;
+            }
+
             // Tecla C (Abre/Fecha celular).
-            if (k === 'c' && e.target.tagName !== 'INPUT' && !isPaused) {
+            if (k === 'c' && e.target.tagName !== 'INPUT' && !isPaused && !adminOpen) {
                 phoneOpen = !phoneOpen;
                 let pScreen = document.getElementById('phoneScreen');
                 if (phoneOpen) {
                     pScreen.style.display = 'flex';
                     document.exitPointerLock();
-                    // Foca no campo certo: se já tem número, foca na mensagem; senão, foca no número
+                    // Foca no campo certo da view ativa
                     setTimeout(() => {
-                        let target = document.getElementById('phoneTarget');
-                        if (target.value.trim()) {
+                        let chatView = document.getElementById('chatView');
+                        if (chatView.style.display === 'flex') {
                             document.getElementById('phoneMsg').focus();
                         } else {
-                            target.focus();
+                            document.getElementById('addContactPhone').focus();
                         }
                     }, 50);
                 } else {
@@ -855,6 +1035,17 @@
                 }
                 return;
             }
+
+            // Tecla O (Abre/Fecha Admin Panel).
+            if (k === 'o' && e.target.tagName !== 'INPUT' && !isPaused && !phoneOpen) {
+                if (adminOpen) {
+                    closeAdminPanel();
+                } else {
+                    openAdminPanel();
+                }
+                return;
+            }
+
             if (e.target.tagName === 'INPUT') return;
 
             if (keys.hasOwnProperty(k)) keys[k] = true;
@@ -975,53 +1166,467 @@
         const aimMarker = createVoxel(0, 0, 0, 0.3, 0.3, 0.3, new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true }), false, false);
         aimMarker.visible = false; // Esconde o cubo, mantendo apenas para lógica
 
-        // --- NPCs (2, 5, 6, 18) ---
         const npcs = [];
-        let dummyBox = new THREE.Box3();
 
-        // Setup Celular Logic
+        // --- Persistent NPC Data ---
+        const npcNames = [
+            "Ana", "Bruno", "Carlos", "Dani", "Edu", "Fabi", "Gabi", "Hugo", "Igor", "Julia",
+            "Kaio", "Lara", "Malu", "Nuno", "Otto", "Pati", "Quim", "Raul", "Sara", "Theo",
+            "Uly", "Vera", "Will", "Ximb", "Yuri", "Zeca",
+            "Rex", "Max", "Bidu", "Mel", "Nina", "Thor"
+        ];
+        const npcBackstories = [
+            "Um carteiro muito rápido que adora conversar.",
+            "Ama cachorros quentes e odeia pombos.",
+            "Tem pavor de altura e nunca anda de helicóptero.",
+            "Gosta de observar helicópteros no tempo livre.",
+            "Dormiu pouco essa noite e está mal humorado.",
+            "Está sempre com pressa para chegar no trabalho.",
+            "Um turista perdido na cidade grande, procurando atrações.",
+            "Trabalha no escritório da esquina e vive estressado.",
+            "Gosta de jogar papo fora com qualquer um que dê atenção.",
+            "Um espião disfarçado observando movimentos suspeitos.",
+            "Só sabe falar sobre a previsão do tempo.",
+            "Dono de uma loja de doces muito famosa.",
+            "Procurando o cachorro que fugiu na semana passada.",
+            "Sabe de todas as fofocas do bairro.",
+            "Adora tirar fotos de absolutamente tudo na cidade.",
+            "Um mágico de rua amador que sempre erra os truques.",
+            "Sempre reclamando do trânsito terrível.",
+            "Muito fã do Cristo Redentor, vai lá todo final de semana.",
+            "Um animal muito esperto que entende as pessoas.",
+            "Apenas um bichinho faminto procurando petiscos."
+        ];
+        const npcSurnames = [
+            "Silva", "Santos", "Oliveira", "Souza", "Rodrigues", "Ferreira", "Alves", "Pereira", "Lima", "Gomes",
+            "Costa", "Ribeiro", "Martins", "Carvalho", "Almeida", "Lopes", "Soares", "Fernandes", "Vieira", "Gomes"
+        ];
+
+        let persistentNpcs = [];
+        try {
+            persistentNpcs = JSON.parse(localStorage.getItem('gameNpcsData')) || [];
+        } catch (e) { }
+
+        function getPersistentNpc(index) {
+            let data = persistentNpcs[index];
+            if (data && data.phone && data.phone.length === 2 && !/\d/.test(data.name)) {
+                return data;
+            }
+            // Create or overwrite if it's old 4-digit formatting or has numbers in name
+            let name = npcNames[Math.floor(Math.random() * npcNames.length)] + " " + npcSurnames[Math.floor(Math.random() * npcSurnames.length)];
+            let backstory = npcBackstories[Math.floor(Math.random() * npcBackstories.length)];
+            let phone = Math.floor(10 + (index % 90)).toString(); // Garante q de 10 a 99 nunca repete até 90 npcs
+            data = { id: index, name, backstory, phone };
+            persistentNpcs[index] = data;
+            localStorage.setItem('gameNpcsData', JSON.stringify(persistentNpcs));
+            return data;
+        }
+
+        let npcSpawnCount = 0;
+
+        // --- Gemini API ---
+        async function askGemini(npc, userText, chatHistory) {
+            const apiKey = document.getElementById('geminiApiKey').value.trim();
+            if (!apiKey) return "Erro: Chave API do Gemini não configurada! Verifique as configurações.";
+
+            // O final :generateContent é obrigatório na API do Google
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
+
+            // Monta o histórico multi-turn para o Gemini lembrar da conversa
+            const systemInstruction = `Você é um NPC neste jogo. Seu nome é ${npc.name}. Sua história: ${npc.backstory}. Responda à mensagem do jogador de forma curta (máx 2 frases), natural e mantendo o personagem.`;
+
+            const contents = [];
+
+            // Adiciona mensagens anteriores do histórico (exclui a última que é a msg atual do user)
+            const previousMessages = chatHistory.slice(0, -1);
+            for (const msg of previousMessages) {
+                contents.push({
+                    role: msg.role === 'user' ? 'user' : 'model',
+                    parts: [{ text: msg.text }]
+                });
+            }
+
+            // Adiciona a mensagem atual do jogador
+            contents.push({
+                role: 'user',
+                parts: [{ text: userText }]
+            });
+
+            // Se não houver histórico anterior, inclui o contexto do personagem na primeira mensagem
+            if (contents.length === 1) {
+                contents[0].parts[0].text = userText;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        systemInstruction: { parts: [{ text: systemInstruction }] },
+                        contents: contents
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Erro da API do Gemini:", response.status, errorText);
+                    return `Erro da API ${response.status}: O nome do modelo pode estar errado ou a API Key é inválida.`;
+                }
+
+                const data = await response.json();
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    return data.candidates[0].content.parts[0].text.trim();
+                } else {
+                    return "Erro na resposta da API.";
+                }
+            } catch (err) {
+                console.error("Erro no fetch:", err);
+                return "Erro ao conectar com a API Gemini.";
+            }
+        }
+
+        let phoneContacts = [];
+        try { phoneContacts = JSON.parse(localStorage.getItem('phoneContacts')) || []; } catch (e) { }
+
+        // --- Setup Celular Logic ---
+        function renderChatHistory(targetNum) {
+            let logs = document.getElementById('phoneLogs');
+            logs.innerHTML = '<div style="font-size: 12px; color: #666; text-align: center;">Inicie a conversa</div>';
+
+            if (!targetNum) return;
+
+            let hist = [];
+            try { hist = JSON.parse(localStorage.getItem('chatHistory_' + targetNum)) || []; } catch (e) { }
+
+            hist.forEach(msg => {
+                let div = document.createElement('div');
+                div.style.padding = '8px';
+                div.style.borderRadius = '10px';
+                div.style.maxWidth = '80%';
+                div.style.fontSize = '14px';
+
+                if (msg.role === 'user') {
+                    div.style.alignSelf = 'flex-end';
+                    div.style.background = '#dcf8c6';
+                    div.style.color = '#000';
+                    div.innerText = msg.text;
+                } else {
+                    div.style.alignSelf = 'flex-start';
+                    div.style.background = '#fff';
+                    div.style.color = '#000';
+                    div.innerText = `${msg.name || targetNum}: ${msg.text}`;
+                }
+                logs.appendChild(div);
+            });
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function openChat(targetNum, targetName) {
+            document.getElementById('agendaView').style.display = 'none';
+            document.getElementById('chatView').style.display = 'flex';
+            document.getElementById('phoneTarget').value = targetNum;
+            document.getElementById('chatTitle').innerText = targetName || targetNum;
+            renderChatHistory(targetNum);
+        }
+
+        function closeChat() {
+            document.getElementById('chatView').style.display = 'none';
+            document.getElementById('agendaView').style.display = 'flex';
+        }
+
+        function renderContacts() {
+            const list = document.getElementById('contactsList');
+            list.innerHTML = '';
+            if (phoneContacts.length === 0) {
+                list.innerHTML = '<div style="font-size: 12px; color: #666; text-align: center;">Nenhum contato salvo ainda.</div>';
+                return;
+            }
+
+            phoneContacts.forEach(contact => {
+                let div = document.createElement('div');
+                div.style.background = '#fff';
+                div.style.padding = '8px';
+                div.style.borderRadius = '5px';
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+
+                let info = document.createElement('div');
+                info.innerHTML = `<strong>${contact.name}</strong><br><span style="font-size:12px;color:#666;">(${contact.phone})</span>`;
+
+                let btns = document.createElement('div');
+                btns.style.display = 'flex';
+                btns.style.gap = '5px';
+
+                let btnChat = document.createElement('button');
+                btnChat.innerText = 'Chat';
+                btnChat.style.background = '#0a0';
+                btnChat.style.color = '#fff';
+                btnChat.style.border = 'none';
+                btnChat.style.borderRadius = '3px';
+                btnChat.style.padding = '5px';
+                btnChat.style.cursor = 'pointer';
+                btnChat.onclick = () => openChat(contact.phone, contact.name);
+
+                let btnDel = document.createElement('button');
+                btnDel.innerText = 'X';
+                btnDel.style.background = '#f00';
+                btnDel.style.color = '#fff';
+                btnDel.style.border = 'none';
+                btnDel.style.borderRadius = '3px';
+                btnDel.style.padding = '5px';
+                btnDel.style.cursor = 'pointer';
+                btnDel.onclick = () => {
+                    phoneContacts = phoneContacts.filter(c => c.phone !== contact.phone);
+                    localStorage.setItem('phoneContacts', JSON.stringify(phoneContacts));
+                    renderContacts();
+                };
+
+                btns.appendChild(btnChat);
+                btns.appendChild(btnDel);
+
+                div.appendChild(info);
+                div.appendChild(btns);
+                list.appendChild(div);
+            });
+        }
+
+        // --- Admin Debug Panel Logic ---
+        let adminOpen = false;
+
+        function openAdminPanel() {
+            adminOpen = true;
+            document.getElementById('adminScreen').style.display = 'flex';
+            document.exitPointerLock();
+
+            document.getElementById('adminChatView').style.display = 'none';
+            document.getElementById('adminListView').style.display = 'flex';
+
+            const list = document.getElementById('adminContactsList');
+            list.innerHTML = '';
+
+            let foundAny = false;
+
+            // Procura todos os históricos salvos no localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if (key.startsWith('chatHistory_')) {
+                    let phoneNum = key.replace('chatHistory_', '');
+                    foundAny = true;
+
+                    // Busca nome no "banco" persistente para exibir
+                    let npcIndexStr = (parseInt(phoneNum) - 10).toString(); // A gente gerou index = phone - 10
+                    let npcName = "Desconhecido";
+                    if (persistentNpcs[npcIndexStr]) {
+                        npcName = persistentNpcs[npcIndexStr].name;
+                    } else {
+                        // Tenta achar nos npc gerados salvos se a formatação num for essa
+                        let fName = npcs.find(n => n.phone == phoneNum);
+                        if (fName) npcName = fName.data.name;
+                    }
+
+                    let div = document.createElement('div');
+                    div.style.background = '#333';
+                    div.style.padding = '10px';
+                    div.style.borderRadius = '5px';
+                    div.style.display = 'flex';
+                    div.style.justifyContent = 'space-between';
+                    div.style.alignItems = 'center';
+
+                    let info = document.createElement('div');
+                    info.innerHTML = `<strong style="color:#0f0;">${npcName}</strong> <span style="font-size:12px;color:#888;">(${phoneNum})</span>`;
+
+                    let btn = document.createElement('button');
+                    btn.innerText = 'Ver Chat / Editar';
+                    btn.style.background = '#00f';
+                    btn.style.color = '#fff';
+                    btn.style.border = 'none';
+                    btn.style.borderRadius = '3px';
+                    btn.style.padding = '8px 12px';
+                    btn.style.cursor = 'pointer';
+                    btn.style.pointerEvents = 'auto';
+                    btn.onclick = () => adminOpenChat(phoneNum, npcName);
+
+                    div.appendChild(info);
+                    div.appendChild(btn);
+                    list.appendChild(div);
+                }
+            }
+
+            if (!foundAny) {
+                list.innerHTML = '<p style="color:#f0a;">Nenhum histórico de chat encontrado. Converse com algum NPC primeiro.</p>';
+            }
+        }
+
+        function closeAdminPanel() {
+            adminOpen = false;
+            document.getElementById('adminScreen').style.display = 'none';
+            document.body.requestPointerLock();
+        }
+
+        function adminOpenChat(targetNum, targetName) {
+            document.getElementById('adminListView').style.display = 'none';
+            document.getElementById('adminChatView').style.display = 'flex';
+            document.getElementById('adminNpcName').innerText = targetName;
+            document.getElementById('adminTargetPhone').value = targetNum;
+
+            // Carrega Logs
+            let logs = document.getElementById('adminLogs');
+            logs.innerHTML = '';
+            let hist = [];
+            try { hist = JSON.parse(localStorage.getItem('chatHistory_' + targetNum)) || []; } catch (e) { }
+
+            if (hist.length === 0) {
+                logs.innerHTML = '<div style="color: #666; text-align: center;">Vazio</div>';
+            } else {
+                hist.forEach(msg => {
+                    let div = document.createElement('div');
+                    div.style.padding = '6px';
+                    div.style.borderRadius = '5px';
+                    div.style.background = msg.role === 'user' ? '#113311' : '#333';
+                    div.style.color = '#ddd';
+                    div.style.borderLeft = msg.role === 'user' ? '4px solid #0f0' : '4px solid #aaa';
+                    div.innerText = `${msg.role === 'user' ? 'Você' : (msg.name || targetNum)}: ${msg.text}`;
+                    logs.appendChild(div);
+                });
+            }
+            logs.scrollTop = logs.scrollHeight;
+
+            // Carrega a backstory atual
+            let idx = (parseInt(targetNum) - 10).toString();
+            let pData = persistentNpcs[idx];
+            if (pData) {
+                document.getElementById('adminBackstoryInput').value = pData.backstory;
+            } else { // Fallback, não deve acontecer nas regras atuais
+                let fNpc = npcs.find(n => n.phone == targetNum);
+                document.getElementById('adminBackstoryInput').value = fNpc ? fNpc.data.backstory : "História não encontrada.";
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('phoneSendBtn').addEventListener('click', () => {
+            renderContacts();
+
+            document.getElementById('adminBtn').addEventListener('click', openAdminPanel);
+            document.getElementById('closeAdminBtn').addEventListener('click', closeAdminPanel);
+            document.getElementById('adminBackBtn').addEventListener('click', () => {
+                document.getElementById('adminChatView').style.display = 'none';
+                document.getElementById('adminListView').style.display = 'flex';
+            });
+
+            document.getElementById('adminSaveConfigBtn').addEventListener('click', () => {
+                let targetNum = document.getElementById('adminTargetPhone').value;
+                let newBs = document.getElementById('adminBackstoryInput').value.trim();
+                let idx = (parseInt(targetNum) - 10).toString();
+
+                if (persistentNpcs[idx]) {
+                    persistentNpcs[idx].backstory = newBs;
+                    localStorage.setItem('gameNpcsData', JSON.stringify(persistentNpcs));
+
+                    // Atualiza em tempo de execução para aplicar na hora
+                    let fNpc = npcs.find(n => n.phone == targetNum);
+                    if (fNpc) {
+                        fNpc.data.backstory = newBs;
+                    }
+
+                    let btn = document.getElementById('adminSaveConfigBtn');
+                    let oldText = btn.innerText;
+                    btn.innerText = "Salvo!";
+                    btn.style.background = "#0f0";
+                    setTimeout(() => {
+                        btn.innerText = oldText;
+                        btn.style.background = "#0a0";
+                    }, 1000);
+                } else {
+                    console.error("Erro ao localizar ID desse NPC (" + idx + ") na base de dados persistente.");
+                }
+            });
+
+            document.getElementById('backToAgendaBtn').addEventListener('click', closeChat);
+
+            document.getElementById('addContactBtn').addEventListener('click', () => {
+                let phone = document.getElementById('addContactPhone').value.trim();
+                if (!phone) return;
+
+                if (phoneContacts.some(c => c.phone === phone)) {
+                    alert("Contato já está na lista!");
+                    return;
+                }
+
+                let foundNpc = npcs.find(n => n.phone == phone);
+                let contactName = foundNpc ? foundNpc.data.name : "Desconhecido";
+
+                phoneContacts.push({ phone: phone, name: contactName });
+                localStorage.setItem('phoneContacts', JSON.stringify(phoneContacts));
+                document.getElementById('addContactPhone').value = '';
+                renderContacts();
+            });
+
+            document.getElementById('phoneSendBtn').addEventListener('click', async () => {
                 let targetNum = document.getElementById('phoneTarget').value.trim();
                 let msgText = document.getElementById('phoneMsg').value.trim();
                 if (!targetNum || !msgText) return;
 
-                let logs = document.getElementById('phoneLogs');
-                let myMsgDiv = document.createElement('div');
-                myMsgDiv.style.alignSelf = 'flex-end';
-                myMsgDiv.style.background = '#dcf8c6';
-                myMsgDiv.style.padding = '8px';
-                myMsgDiv.style.borderRadius = '10px';
-                myMsgDiv.style.maxWidth = '80%';
-                myMsgDiv.style.color = '#000';
-                myMsgDiv.innerText = `Para ${targetNum}: ${msgText}`;
-                logs.appendChild(myMsgDiv);
+                let hist = [];
+                try { hist = JSON.parse(localStorage.getItem('chatHistory_' + targetNum)) || []; } catch (e) { }
 
-                let foundNpc = npcs.find(n => n.phone === targetNum);
-
-                setTimeout(() => {
-                    let replyDiv = document.createElement('div');
-                    replyDiv.style.alignSelf = 'flex-start';
-                    replyDiv.style.background = '#fff';
-                    replyDiv.style.padding = '8px';
-                    replyDiv.style.borderRadius = '10px';
-                    replyDiv.style.maxWidth = '80%';
-                    replyDiv.style.color = '#000';
-
-                    if (foundNpc) {
-                        const respostas = ["Oi! Tudo bem?", "Estou ocupado agora, desculpe.", "Que cidade legal, né?", "Cuidado com os carros!", "Legal receber sua mensagem!"];
-                        replyDiv.innerText = `NPC ${targetNum}: ${respostas[Math.floor(Math.random() * respostas.length)]}`;
-                        if (foundNpc.mesh) foundNpc.jumpTimer = Math.PI; // Pulinho de alegria temporário
-                    } else {
-                        replyDiv.innerText = "Sistema: Número não encontrado.";
-                        replyDiv.style.color = "red";
-                    }
-                    logs.appendChild(replyDiv);
-                    logs.scrollTop = logs.scrollHeight;
-                }, 1000);
+                // Add user msg
+                hist.push({ role: 'user', text: msgText });
+                localStorage.setItem('chatHistory_' + targetNum, JSON.stringify(hist));
+                renderChatHistory(targetNum);
 
                 document.getElementById('phoneMsg').value = '';
+
+                let foundNpc = npcs.find(n => n.phone == targetNum);
+                let npcData = foundNpc ? foundNpc.data : { name: "Desconhecido", backstory: "Um número misterioso." };
+
+                let replyText = "";
+
+                // Show thinking...
+                let logs = document.getElementById('phoneLogs');
+                let thinkingDiv = document.createElement('div');
+                thinkingDiv.id = 'thinkingDiv';
+                thinkingDiv.style.alignSelf = 'flex-start';
+                thinkingDiv.style.background = '#fff';
+                thinkingDiv.style.padding = '8px';
+                thinkingDiv.style.borderRadius = '10px';
+                thinkingDiv.style.maxWidth = '80%';
+                thinkingDiv.style.color = '#888';
+                thinkingDiv.style.fontStyle = 'italic';
+                thinkingDiv.innerText = "Digitando...";
+                logs.appendChild(thinkingDiv);
                 logs.scrollTop = logs.scrollHeight;
+
+                npcMode = document.getElementById('npcModeToggle').checked; // check just in case
+
+                if (npcMode) {
+                    replyText = await askGemini(npcData, msgText, hist);
+                } else {
+                    // Standard mock conversation
+                    await new Promise(r => setTimeout(r, 1000));
+                    if (foundNpc) {
+                        const respostas = ["Oi! Tudo bem?", "Estou ocupado agora, desculpe.", "Que cidade legal, né?", "Cuidado com os carros!", "Gostei de falar com você!"];
+                        replyText = respostas[Math.floor(Math.random() * respostas.length)];
+                    } else {
+                        replyText = "Sistema: Número não encontrado. Verifique se digitou corretamente.";
+                        npcData.name = "Sistema";
+                    }
+                }
+
+                let tDiv = document.getElementById('thinkingDiv');
+                if (tDiv) tDiv.remove();
+
+                hist.push({ role: 'npc', name: npcData.name, text: replyText });
+                localStorage.setItem('chatHistory_' + targetNum, JSON.stringify(hist));
+                renderChatHistory(targetNum);
+
+                if (foundNpc && foundNpc.talkingIndicator) {
+                    foundNpc.jumpTimer = Math.PI; // Pulinho de alegria temporário
+                    foundNpc.talkingIndicator.visible = true;
+                    if (foundNpc.talkTimeout) clearTimeout(foundNpc.talkTimeout);
+                    foundNpc.talkTimeout = setTimeout(() => {
+                        foundNpc.talkingIndicator.visible = false;
+                    }, 4000);
+                }
             });
 
             document.getElementById('phoneMsg').addEventListener('keypress', (e) => {
@@ -1030,6 +1635,8 @@
         });
 
         function spawnNPC(isSpecial = false) {
+            let myNpcData = getPersistentNpc(npcSpawnCount);
+            npcSpawnCount++;
             let x, z;
             let valid = false;
             while (!valid) {
@@ -1040,6 +1647,7 @@
                 if (Math.abs(x % blockSize) < roadWidth / 2 || Math.abs(z % blockSize) < roadWidth / 2) valid = false;
 
                 // Avoid buildings and obstacles
+                let dummyBox = new THREE.Box3();
                 if (valid) {
                     dummyBox.setFromCenterAndSize(new THREE.Vector3(x, 1.5, z), new THREE.Vector3(1.5, 3, 1.5));
                     for (let c of collidables) {
@@ -1094,29 +1702,10 @@
                 let olhoR = createVoxel(0.2, 2.6, 0.41, 0.15, 0.15, 0.05, npcMatRosto);
                 let boca = createVoxel(0, 2.3, 0.41, 0.4, 0.1, 0.05, npcMatRosto);
 
-                // Telefone (só humanos têm)
-                let phoneNumber = Math.floor(10 + Math.random() * 90).toString();
-                const numCanvas = document.createElement('canvas');
-                numCanvas.width = 128; numCanvas.height = 128;
-                const ctxNum = numCanvas.getContext('2d');
-                ctxNum.fillStyle = '#' + myShirtMat.color.getHexString();
-                ctxNum.fillRect(0, 0, 128, 128);
-                ctxNum.fillStyle = '#ffffff';
-                ctxNum.font = 'bold 45px Arial';
-                ctxNum.textAlign = 'center';
-                ctxNum.textBaseline = 'middle';
-                ctxNum.fillText(phoneNumber, 64, 64);
-                const texNum = new THREE.CanvasTexture(numCanvas);
-                const matNum = new THREE.MeshLambertMaterial({ map: texNum });
-                // Numero virado para trás (-Z)
-                numbBack = createVoxel(0, 1.5, -0.26, 0.8, 0.8, 0.05, matNum);
-                numbBack.rotation.y = Math.PI;
-
-                // Numero virado para frente (+Z)
-                let numbFront = createVoxel(0, 1.5, 0.26, 0.8, 0.8, 0.05, matNum);
-
-                parts.push(body, head, olhoL, olhoR, boca, armL, armR, legL, legR, numbBack, numbFront);
-                g.userData.phone = phoneNumber; // Salva o numero no grupo
+                // Removidas as placas numéricas do corpo
+                let phoneNumber = myNpcData.phone;
+                parts.push(body, head, olhoL, olhoR, boca, armL, armR, legL, legR);
+                g.userData.phone = myNpcData.phone; // Salva o numero no grupo
             } else if (npcType === 'dog') {
                 let dogColors = [0x8B4513, 0xCD853F, 0xD2B48C, 0x000000, 0xFFFFFF];
                 let dMat = new THREE.MeshLambertMaterial({ color: dogColors[Math.floor(Math.random() * dogColors.length)] });
@@ -1136,7 +1725,7 @@
                 armL = createVoxel(-0.15, 0.45, -0.3, 0.1, 0.3, 0.1, dMat); // BL
                 armR = createVoxel(0.15, 0.45, -0.3, 0.1, 0.3, 0.1, dMat); // BR
                 parts.push(dBody, dHead, dSnout, dNose, dEarL, dEarR, dTail, dEyeL, dEyeR, legL, legR, armL, armR);
-                g.userData.phone = "DOG";
+                g.userData.phone = myNpcData.phone;
             } else if (npcType === 'cat') {
                 let catColors = [0xFFFFFF, 0x000000, 0xFFA500, 0x808080, 0xA0522D];
                 let cMat = new THREE.MeshLambertMaterial({ color: catColors[Math.floor(Math.random() * catColors.length)] });
@@ -1154,10 +1743,51 @@
                 armL = createVoxel(-0.1, 0.4, -0.2, 0.05, 0.2, 0.05, cMat); // BL
                 armR = createVoxel(0.1, 0.4, -0.2, 0.05, 0.2, 0.05, cMat); // BR
                 parts.push(cBody, cHead, cEarL, cEarR, cTail, cEyeL, cEyeR, legL, legR, armL, armR);
-                g.userData.phone = "CAT";
+                g.userData.phone = myNpcData.phone;
             }
 
             parts.forEach(p => g.add(p));
+
+            // Name Sprite
+            const nameCanvas = document.createElement('canvas');
+            nameCanvas.width = 256; nameCanvas.height = 64;
+            const ctxName = nameCanvas.getContext('2d');
+            ctxName.fillStyle = 'rgba(0,0,0,0.5)';
+            ctxName.fillRect(0, 0, 256, 64);
+            ctxName.fillStyle = '#ffffff';
+            ctxName.font = 'bold 24px Arial';
+            ctxName.textAlign = 'center';
+            ctxName.textBaseline = 'middle';
+            let txtNameToShow = myNpcData.phone ? `(${myNpcData.phone}) ${myNpcData.name}` : myNpcData.name;
+            ctxName.fillText(txtNameToShow, 128, 32);
+            const texName = new THREE.CanvasTexture(nameCanvas);
+            const matName = new THREE.SpriteMaterial({ map: texName });
+            const nameSprite = new THREE.Sprite(matName);
+            nameSprite.position.set(0, 3.8, 0); // Acima da cabeça
+            nameSprite.scale.set(3, 0.75, 1);
+            g.add(nameSprite);
+
+            // Talking Indicator Sprite
+            const iconCanvas = document.createElement('canvas');
+            iconCanvas.width = 64; iconCanvas.height = 64;
+            const ctxIcon = iconCanvas.getContext('2d');
+            ctxIcon.fillStyle = '#ffaa00';
+            ctxIcon.beginPath();
+            ctxIcon.arc(32, 32, 28, 0, Math.PI * 2);
+            ctxIcon.fill();
+            ctxIcon.fillStyle = '#ffffff';
+            ctxIcon.font = 'bold 30px Arial';
+            ctxIcon.textAlign = 'center';
+            ctxIcon.textBaseline = 'middle';
+            ctxIcon.fillText('...', 32, 34);
+            const texIcon = new THREE.CanvasTexture(iconCanvas);
+            const matIcon = new THREE.SpriteMaterial({ map: texIcon });
+            const talkingSprite = new THREE.Sprite(matIcon);
+            talkingSprite.position.set(0, 4.8, 0); // Acima do nome
+            talkingSprite.scale.set(1, 1, 1);
+            talkingSprite.visible = false;
+            g.add(talkingSprite);
+
             scene.add(g);
 
             let specialMarker = null;
@@ -1174,7 +1804,9 @@
                 isSpc: isSpecial,
                 marker: specialMarker,
                 state: 'walk',
-                phone: g.userData.phone || ''
+                phone: myNpcData.phone,
+                data: myNpcData,
+                talkingIndicator: talkingSprite
             });
         }
         for (let i = 0; i < 30; i++) spawnNPC(i < 5); // 5 especiais (origem e destino espalhados)
