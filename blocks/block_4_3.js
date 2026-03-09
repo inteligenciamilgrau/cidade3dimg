@@ -1,14 +1,14 @@
 // blocks/block_4_3.js
-(function() {
+(function () {
     window.customBlocks = window.customBlocks || {};
-    window.customBlocks['4_3'] = function(ctx) {
+    window.customBlocks['4_3'] = function (ctx) {
 
         // === CONFIGURAÇÕES ===
         const cx = ctx.centerX;
         const cz = ctx.centerZ;
-        
+
         // Cores
-        const C_COPPER = 0x43B3AE; 
+        const C_COPPER = 0x43B3AE;
         const C_STONE = 0x888888;
         const C_GOLD = 0xFFD700;
         const C_FIRE = 0xFF4500;
@@ -18,7 +18,7 @@
             let mat;
             if (matType === 'Basic') mat = new ctx.THREE.MeshBasicMaterial({ color: color });
             else mat = new ctx.THREE.MeshLambertMaterial({ color: color });
-            
+
             const mesh = ctx.createVoxel(x, y, z, w, h, d, mat);
             ctx.collidables.push(new ctx.THREE.Box3().setFromObject(mesh));
             return mesh;
@@ -35,7 +35,7 @@
             let state = 'WAIT_BOTTOM';
             let timer = 0;
             const Y_BOT = 2;
-            const Y_TOP = 32.2; 
+            const Y_TOP = 32.2;
 
             setInterval(() => {
                 if (state === 'UP') {
@@ -59,7 +59,7 @@
                     timer += 16;
                     if (timer > 3000) state = 'UP';
                 }
-                
+
                 platform.updateMatrixWorld();
                 elBox.setFromObject(platform);
             }, 16);
@@ -67,16 +67,16 @@
 
         // === 2. BASE SÓLIDA ===
         createSolid(cx, 1, cz, 28, 2, 28, C_STONE);
-        
+
         // Paredes Grossas
         createSolid(cx, 6, cz - 8, 20, 10, 4, C_STONE); // Trás
         createSolid(cx - 8, 6, cz, 4, 10, 20, C_STONE); // Esq
         createSolid(cx + 8, 6, cz, 4, 10, 20, C_STONE); // Dir
-        
+
         // Frente (Entrada)
-        createSolid(cx - 6, 6, cz + 8, 8, 10, 4, C_STONE); 
+        createSolid(cx - 6, 6, cz + 8, 8, 10, 4, C_STONE);
         createSolid(cx + 6, 6, cz + 8, 8, 10, 4, C_STONE);
-        createSolid(cx, 9, cz + 8, 6, 4, 4, C_STONE); 
+        createSolid(cx, 9, cz + 8, 6, 4, 4, C_STONE);
 
         // === 3. CORPO ===
         const by = 22;
@@ -92,17 +92,17 @@
         createSolid(cx + 4.5, hy, cz, 4, 1, 10, C_COPPER);
         createSolid(cx, hy, cz - 4.5, 5, 1, 4, C_COPPER);
         createSolid(cx, hy, cz + 4.5, 5, 1, 4, C_COPPER);
-        
+
         // Colunas e Teto
-        createSolid(cx - 4, hy+3, cz - 4, 1, 5, 1, C_COPPER);
-        createSolid(cx + 4, hy+3, cz - 4, 1, 5, 1, C_COPPER);
-        createSolid(cx - 4, hy+3, cz + 4, 1, 5, 1, C_COPPER);
-        createSolid(cx + 4, hy+3, cz + 4, 1, 5, 1, C_COPPER);
-        createSolid(cx, hy+6, cz, 10, 1, 10, C_COPPER);
+        createSolid(cx - 4, hy + 3, cz - 4, 1, 5, 1, C_COPPER);
+        createSolid(cx + 4, hy + 3, cz - 4, 1, 5, 1, C_COPPER);
+        createSolid(cx - 4, hy + 3, cz + 4, 1, 5, 1, C_COPPER);
+        createSolid(cx + 4, hy + 3, cz + 4, 1, 5, 1, C_COPPER);
+        createSolid(cx, hy + 6, cz, 10, 1, 10, C_COPPER);
 
         // Coroa
-        createSolid(cx, hy+8, cz, 2, 4, 2, C_GOLD);
-        createSolid(cx, hy+7, cz+3, 1, 2, 4, C_GOLD);
+        createSolid(cx, hy + 8, cz, 2, 4, 2, C_GOLD);
+        createSolid(cx, hy + 7, cz + 3, 1, 2, 4, C_GOLD);
 
         // === 5. BRAÇOS ===
         createSolid(cx + 6, 28, cz, 6, 4, 4, C_COPPER); // Ombro
@@ -115,9 +115,9 @@
         const cvs = document.createElement('canvas');
         cvs.width = 512; cvs.height = 256;
         const c2 = cvs.getContext('2d');
-        
-        c2.fillStyle = '#FFCC00'; c2.fillRect(0,0,512,256); // Fundo
-        c2.lineWidth = 20; c2.strokeStyle = '#000000'; c2.strokeRect(0,0,512,256); // Borda
+
+        c2.fillStyle = '#FFCC00'; c2.fillRect(0, 0, 512, 256); // Fundo
+        c2.lineWidth = 20; c2.strokeStyle = '#000000'; c2.strokeRect(0, 0, 512, 256); // Borda
         c2.font = '900 80px Arial Black'; c2.fillStyle = '#000000';
         c2.textAlign = 'center'; c2.textBaseline = 'middle';
         c2.fillText("GEMINI", 256, 100);
@@ -137,6 +137,5 @@
         createSolid(cx + 10, 2, cz + 12.0, 0.5, 4, 0.5, C_STONE);
 
         initElevator();
-        console.log("Block 4_3: Haste movida para trás da placa.");
     };
 })();
