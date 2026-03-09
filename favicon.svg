@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Fundo noturno -->
+  <rect width="32" height="32" fill="#001133" rx="6"/>
+  <!-- Lua -->
+  <circle cx="24" cy="7" r="4" fill="#ffcc44"/>
+  <!-- Prédio esquerdo -->
+  <rect x="2" y="14" width="8" height="18" fill="#0044aa"/>
+  <rect x="3" y="16" width="2" height="2" fill="#ffff88"/>
+  <rect x="7" y="16" width="2" height="2" fill="#ffff88"/>
+  <rect x="3" y="20" width="2" height="2" fill="#ffff88"/>
+  <rect x="7" y="20" width="2" height="2" fill="#ffff88"/>
+  <rect x="3" y="24" width="2" height="2" fill="#ffff88"/>
+  <rect x="7" y="24" width="2" height="2" fill="#ffff88"/>
+  <!-- Prédio central alto -->
+  <rect x="12" y="8" width="8" height="24" fill="#0066cc"/>
+  <rect x="13" y="10" width="2" height="2" fill="#ffff88"/>
+  <rect x="17" y="10" width="2" height="2" fill="#ffff88"/>
+  <rect x="13" y="15" width="2" height="2" fill="#ffff88"/>
+  <rect x="17" y="15" width="2" height="2" fill="#ffff88"/>
+  <rect x="13" y="20" width="2" height="2" fill="#ffff88"/>
+  <rect x="17" y="20" width="2" height="2" fill="#ffff88"/>
+  <rect x="13" y="25" width="2" height="2" fill="#ffff88"/>
+  <rect x="17" y="25" width="2" height="2" fill="#ffff88"/>
+  <!-- Antena central -->
+  <rect x="15" y="4" width="2" height="5" fill="#aaaaaa"/>
+  <circle cx="16" cy="4" r="1.5" fill="#ff4444"/>
+  <!-- Prédio direito -->
+  <rect x="22" y="17" width="8" height="15" fill="#003388"/>
+  <rect x="23" y="19" width="2" height="2" fill="#ffff88"/>
+  <rect x="27" y="19" width="2" height="2" fill="#ffff88"/>
+  <rect x="23" y="24" width="2" height="2" fill="#ffff88"/>
+  <rect x="27" y="24" width="2" height="2" fill="#ffff88"/>
+  <!-- Rua -->
+  <rect x="0" y="30" width="32" height="2" fill="#222222"/>
+</svg>

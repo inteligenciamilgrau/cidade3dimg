@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cidade 3D IMG</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/game.css">
 </head>
 
@@ -168,18 +169,38 @@
     </div>
 
     <!-- ===================== SCRIPTS ===================== -->
-    <!-- Carregador de blocos customizados -->
-    <script>
+    <!-- Carregador de blocos customizados — sem erros 404 no console -->
+    <script type="module">
         window.customBlocks = window.customBlocks || {};
-        for (let col = 1; col <= 5; col++) {
-            for (let row = 1; row <= 5; row++) {
-                document.write('<scr' + 'ipt src="blocks/block_' + col + '_' + row + '.js" onerror=""><\/scr' + 'ipt>');
+
+        async function loadBlocks() {
+            for (let col = 1; col <= 5; col++) {
+                for (let row = 1; row <= 5; row++) {
+                    const url = `blocks/block_${col}_${row}.js`;
+                    try {
+                        const res = await fetch(url);
+                        if (!res.ok) continue; // 404 ou outro erro → pula silenciosamente
+                        // Injeta como script apenas se o arquivo existir
+                        await new Promise((resolve) => {
+                            const s = document.createElement('script');
+                            s.src = url;
+                            s.onload = resolve;
+                            s.onerror = resolve; // mesmo assim nunca bloqueia
+                            document.head.appendChild(s);
+                        });
+                    } catch (_) {
+                        // Erro de rede → ignora silenciosamente
+                    }
+                }
             }
         }
-    </script>
 
-    <!-- Ponto de entrada do jogo (ES Module) -->
-    <script type="module" src="js/main.js"></script>
+        // Carrega os blocos antes do main.js inicializar a cena
+        await loadBlocks();
+
+        // Importa o ponto de entrada do jogo após todos os blocos carregados
+        await import('./js/main.js');
+    </script>
 
 </body>
 
