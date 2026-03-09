@@ -81,6 +81,7 @@ player.add(pBody, pHead, pEyeL, pEyeR, pMouth, pMC1, pMC2, pArmL, pArmR, pLegL, 
 const handObj = createVoxel(0.6, 1, 0.5, 0.5, 0.5, 0.5, new THREE.MeshLambertMaterial({ color: 0xffff00 }));
 handObj.visible = false;
 player.add(handObj);
+gameState.handObj = handObj; // Referência usada pelo systems/mission.js
 
 // ---- Raycaster ----
 const raycaster = new THREE.Raycaster();
@@ -139,7 +140,7 @@ function toggleVehicle() {
         } else {
             let closestAnimal = null, minA = 5;
             npcs.forEach(n => {
-                if (n.npcType === 'dog' || n.npcType === 'cat') {
+                if ((n.npcType === 'dog' || n.npcType === 'cat') && !n.isSpc) {
                     const d = player.position.distanceTo(n.mesh.position);
                     if (d < minA) { closestAnimal = n; minA = d; }
                 }
@@ -156,7 +157,7 @@ function toggleVehicle() {
 
 function takeDamage() {
     gameState.health--;
-    updateHealthDisplay();
+    updateHealthDisplay(gameState.health);
     player.position.y += 2; velocity.y = 10;
     showMsg("Ai! -1 Coração!");
     if (gameState.health <= 0) {
@@ -468,15 +469,64 @@ function update() {
         player.position.x += (boat.position.x - oldBoatX);
     }
 
-    // Patinho (simplificado)
+    // Patinho — caminha pelo lago OU segue o jogador com o objeto na mão
     duckP += dt;
-    const inWater = duck.position.x >= 60 && duck.position.x <= 100 && duck.position.z >= 60 && duck.position.z <= 100;
-    if (inWater) {
-        duck.position.y = -0.1 + Math.sin(duckP * 3) * 0.1;
-        dLegL.visible = dLegR.visible = false;
-    } else {
-        duck.position.y = 0.9 + Math.abs(Math.sin(duckP * 2)) * 0.15;
+    if (!duck.userData.dir) {
+        duck.userData.dir = new THREE.Vector3(1, 0, 0.5).normalize();
+        duck.userData.walkTimer = 0;
+    }
+
+    const pObj2 = gameState.currentVehicle ? (gameState.currentVehicle.mesh || gameState.currentVehicle) : player;
+
+    const toDuckVec = new THREE.Vector3(
+        pObj2.position.x - duck.position.x,
+        0,
+        pObj2.position.z - duck.position.z
+    );
+    const distToPlayer = toDuckVec.length();
+
+    // Só segue se: tem objeto na mão E jogador está perto (<= 20 unidades)
+    const shouldFollow = gameState.carryingTarget && distToPlayer <= 20;
+
+    if (shouldFollow && distToPlayer > 2) {
+        // ── MODO SEGUIR: velocidade normal de caminhada ──
+        toDuckVec.normalize();
+        duck.userData.dir.copy(toDuckVec);
+        const followSpeed = 6;
+        duck.position.x += toDuckVec.x * followSpeed * dt;
+        duck.position.z += toDuckVec.z * followSpeed * dt;
+        duck.rotation.y = Math.atan2(duck.userData.dir.x, duck.userData.dir.z);
+        duck.position.y = 1.0 + Math.abs(Math.sin(duckP * 8)) * 0.2; // Y=1.0 → pernas no chão
         dLegL.visible = dLegR.visible = true;
+        dLegL.rotation.x = Math.sin(duckP * 8) * 0.5;
+        dLegR.rotation.x = -Math.sin(duckP * 8) * 0.5;
+    } else {
+        // ── MODO VAGAR: passeio aleatório pelo lago ──
+        duck.userData.walkTimer += dt;
+        if (duck.userData.walkTimer > 2 + Math.random() * 2) {
+            duck.userData.dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), (Math.random() - 0.5) * Math.PI * 0.8);
+            duck.userData.dir.normalize();
+            duck.userData.walkTimer = 0;
+        }
+        const duckSpeed = 1.5;
+        const nextDX = duck.position.x + duck.userData.dir.x * duckSpeed * dt;
+        const nextDZ = duck.position.z + duck.userData.dir.z * duckSpeed * dt;
+        if (nextDX >= 58 && nextDX <= 102) duck.position.x = nextDX;
+        else { duck.userData.dir.x *= -1; duck.userData.dir.normalize(); }
+        if (nextDZ >= 58 && nextDZ <= 102) duck.position.z = nextDZ;
+        else { duck.userData.dir.z *= -1; duck.userData.dir.normalize(); }
+        duck.rotation.y = Math.atan2(duck.userData.dir.x, duck.userData.dir.z);
+
+        const inWater = duck.position.x >= 62 && duck.position.x <= 98 && duck.position.z >= 62 && duck.position.z <= 98;
+        if (inWater) {
+            duck.position.y = 0.2 + Math.sin(duckP * 3) * 0.1; // Flutua na superfície da água
+            dLegL.visible = dLegR.visible = false;
+        } else {
+            duck.position.y = 1.0 + Math.abs(Math.sin(duckP * 6)) * 0.2; // Y=1.0 → pernas no chão
+            dLegL.visible = dLegR.visible = true;
+            dLegL.rotation.x = Math.sin(duckP * 6) * 0.4;
+            dLegR.rotation.x = -Math.sin(duckP * 6) * 0.4;
+        }
     }
 
     checkMission(gameState.currentVehicle ? (gameState.currentVehicle.mesh || gameState.currentVehicle) : player, gameState, null);
