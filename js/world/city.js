@@ -93,7 +93,6 @@ export function buildCity() {
                         createVoxel, THREE, collidables, buildings,
                         centerX: bx, centerZ: bz, blockW
                     });
-                    console.log('Bloco customizado carregado:', blockKey, `em X=${bx} Z=${bz}`);
                 } catch (e) {
                     console.error('Erro no bloco customizado ' + blockKey + ':', e);
                 }
