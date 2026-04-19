@@ -450,11 +450,16 @@ function update() {
                 offset = new THREE.Vector3(0, 5, 10).applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
             } else {
                 const bX = Math.sin(yaw), bZ = Math.cos(yaw);
-                offset = new THREE.Vector3(bX * 10, 5, bZ * 10).applyAxisAngle(new THREE.Vector3(bZ, 0, -bX), -pitch);
+                // Aumentando a distância (de 10 para 16) e altura (de 5 para 8)
+                offset = new THREE.Vector3(bX * 16, 8, bZ * 16).applyAxisAngle(new THREE.Vector3(bZ, 0, -bX), -pitch);
             }
             camera.position.copy(vMesh.position).add(offset);
             const lookTarget = vMesh.position.clone();
-            if (gameState.currentVehicle === heli) lookTarget.y += 3;
+            if (gameState.currentVehicle === heli) {
+                lookTarget.y += 3;
+            } else {
+                lookTarget.y += 4; // Eleva mais o alvo para o carro ficar bem na parte de baixo
+            }
             camera.lookAt(lookTarget);
         }
     } else {
