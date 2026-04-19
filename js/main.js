@@ -52,7 +52,7 @@ const gameState = {
     timerActive: true,
 };
 
-let pitch = 0, yaw = Math.PI * 0.5; // Iniciando virado para o heliporto/centro
+let pitch = 0, yaw = Math.PI; // Iniciando olhando para o heliporto em 3_2
 let pOnGround = false;
 const velocity = new THREE.Vector3();
 
@@ -61,7 +61,7 @@ buildCity();
 
 // ---- Player ----
 const player = new THREE.Group();
-player.position.set(10, 2, 0); // Spawn perto do heliporto (centro)
+player.position.set(10, 1, -40); // Spawn colado no heliporto (bloco 3_2, Z=-40)
 scene.add(player);
 
 const pBody = createVoxel(0, 1.5, 0, 1, 1, 0.5, matShirt);
@@ -256,8 +256,8 @@ setupTimerToggle(gameState);
 
 // Configuração do Respawn
 setupRespawnEvents(() => {
-    // Ação ao confirmar: Teleporta para o spawn perto do heliporto
-    const spawnPos = new THREE.Vector3(10, 2, 0);
+    // Ação ao confirmar: Teleporta para o spawn colado no heliporto
+    const spawnPos = new THREE.Vector3(10, 1, -40);
     
     if (gameState.currentVehicle) {
         const v = gameState.currentVehicle;
@@ -492,8 +492,8 @@ function update() {
     const oldBP = bondinho.position.clone();
     bondinho.position.set(
         -56 + Math.sin(bondinhoP) * 16, 
-        36 - Math.sin(bondinhoP) * 6, 
-        -80
+        32.75 - Math.sin(bondinhoP) * 2.75, 
+        -85 - Math.sin(bondinhoP) * 5
     );
     const bDelta = bondinho.position.clone().sub(oldBP);
     bondinhoBoxes.forEach(b => b.box.setFromObject(b.mesh));

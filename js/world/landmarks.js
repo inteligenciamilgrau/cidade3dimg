@@ -5,6 +5,10 @@ import { THREE, scene } from '../core/renderer.js';
 import { createVoxel } from '../core/voxel.js';
 import { matWater, matWood, matSkin, matGrass } from '../core/materials.js';
 import { collidables } from './city.js';
+const matBondinho = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+const matGlass = new THREE.MeshLambertMaterial({ color: 0xaaeeff, transparent: true, opacity: 0.5 });
+const matPlat = new THREE.MeshLambertMaterial({ color: 0x555555 });
+
 
 // ---- Lago (Pond) ----
 const pondMat = new THREE.MeshLambertMaterial({ color: 0xdbce9d }); // Areia
@@ -76,32 +80,53 @@ ctxGem.textBaseline = 'middle';
 ctxGem.fillText('Gemini 3.1 Pro High', 256, 64);
 const texGem = new THREE.CanvasTexture(canvasGemini);
 const matGem = new THREE.MeshBasicMaterial({ map: texGem });
-export const geminiSign = createVoxel(-75, 42, -75, 8, 2, 0.5, matGem);
-geminiSign.rotation.y = -Math.PI / 4;
+export const geminiSign = createVoxel(-66, 36.5, -70, 8, 2, 0.5, matGem);
+geminiSign.rotation.y = Math.PI / 2;
 collidables.push(new THREE.Box3().setFromObject(geminiSign));
 
-// Cristo Redentor
+// Cristo Redentor GIGANTE (Animado / Rotacionado)
 const stoneMat = new THREE.MeshLambertMaterial({ color: 0xdddddd });
-export const chBase = createVoxel(-80, 42, -80, 4, 4, 4, stoneMat);
-createVoxel(-80, 48, -80, 4, 10, 3, stoneMat);
-createVoxel(-80, 50, -80, 16, 2, 2, stoneMat);
-createVoxel(-80, 54, -80, 3, 3, 3, stoneMat);
+export const christGroup = new THREE.Group();
+christGroup.position.set(-80, 35, -80);
+scene.add(christGroup);
+
+function addCHPart(x, y, z, w, h, d) {
+    const m = createVoxel(x, y, z, w, h, d, stoneMat);
+    christGroup.add(m);
+    m.position.set(x + 80, y - 35, z + 80); // Transforma em local
+    return m;
+}
+
+// Pedestal
+addCHPart(-80, 37.5, -80, 10, 5, 10);
+// Estátua
+export const chBase = addCHPart(-80, 44, -80, 8, 8, 8); // Pés
+addCHPart(-80, 60, -80, 8, 24, 6); // Corpo
+addCHPart(-80, 68, -80, 32, 4, 4); // Braços
+addCHPart(-80, 75, -80, 6, 6, 6); // Cabeça
+
+// Rotaciona 45 graus (PI/4) para olhar direto para o centro da cidade (0,0)
+christGroup.rotation.y = Math.PI / 4;
+
+// Colisão da base (como o grupo rotaciona, usamos a caixa da base fixa para simplificar)
 collidables.push(new THREE.Box3().setFromObject(chBase));
 
-// ---- Pão de Açúcar ----
-const paoLevels = 18;
+// ---- Pão de Açúcar (Níveis mais altos e trilha contínua para subir fácil) ----
+const paoLevels = 24; 
 for (let i = 0; i < paoLevels; i++) {
     const s = 20 - i * (20 / paoLevels);
-    const h = 30 / paoLevels;
+    const h = 30 / paoLevels; // h = 1.25
     const y = i * h + h / 2;
-    // Movido de -120 para -90 para ficar totalmente dentro do mapa
     const layer = createVoxel(-40, y, -80, s, h, s, mountainMat);
     collidables.push(new THREE.Box3().setFromObject(layer));
+
+    // Trilinha cinza contínua (mais fácil de subir que degraus picados)
+    const trailStep = createVoxel(-40, y, -80 + (s/2) + 0.2, 5, h, 1, matPlat);
+    collidables.push(new THREE.Box3().setFromObject(trailStep));
 }
 
 // ---- Bondinho ----
-const matBondinho = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-const matGlass = new THREE.MeshLambertMaterial({ color: 0xaaeeff, transparent: true, opacity: 0.5 });
+
 export const bondinho = new THREE.Group();
 bondinho.position.set(-60, 25, -100);
 scene.add(bondinho);
@@ -147,8 +172,8 @@ addBPart(0, 7.3, 0, 1, 0.2, 1, matWood, false);
 
 // ---- Cabo do Bondinho ----
 // Conectando os dois extremos (Corcovado STATION e Pão de Açúcar)
-const p1 = new THREE.Vector3(-72, 42, -80);  // Estação Corcovado
-const p2 = new THREE.Vector3(-40, 30, -80);  // Estação Pão de Açúcar
+const p1 = new THREE.Vector3(-72, 35.5, -80);  // Estação Corcovado
+const p2 = new THREE.Vector3(-40, 30, -90);  // Estação Pão de Açúcar
 const dist = p1.distanceTo(p2);
 const cableMesh = new THREE.Mesh(
     new THREE.BoxGeometry(0.2, 0.2, dist),
@@ -156,22 +181,41 @@ const cableMesh = new THREE.Mesh(
 );
 cableMesh.position.copy(p1).add(p2).multiplyScalar(0.5);
 cableMesh.position.y += 7.3; // Alinhado com o suporte
-cableMesh.lookAt(p2);
+cableMesh.lookAt(p2.x, p2.y + 7.3, p2.z);
 scene.add(cableMesh);
 
 // ---- Estações do Bondinho ----
-const matPlat = new THREE.MeshLambertMaterial({ color: 0x555555 });
 
-// Estação Corcovado (Plataforma Panorâmica Gigante ao redor do Cristo)
-const plat1 = createVoxel(-80, 41.5, -80, 24, 0.5, 24, matPlat);
-collidables.push(new THREE.Box3().setFromObject(plat1));
 
-// Gramado ao redor do Cristo
-const grassCorc = createVoxel(-80, 41.8, -80, 22, 0.2, 22, matGrass);
-collidables.push(new THREE.Box3().setFromObject(grassCorc));
+// Estação Corcovado (Plataforma Panorâmica REDONDA)
+const circGeo = new THREE.CylinderGeometry(15, 15, 0.5, 32);
+const plat1 = new THREE.Mesh(circGeo, matPlat);
+plat1.position.set(-80, 35, -80);
+scene.add(plat1);
+
+// Gramado Redondo
+const grassGeo = new THREE.CylinderGeometry(14, 14, 0.2, 32);
+const grassCorc = new THREE.Mesh(grassGeo, matGrass);
+grassCorc.position.set(-80, 35.3, -80);
+scene.add(grassCorc);
+
+// Colisões (Aproximação por caixas para performance)
+const platBox = new THREE.Box3().setFromCenterAndSize(
+    new THREE.Vector3(-80, 35, -80), 
+    new THREE.Vector3(22, 0.5, 22)
+);
+const platBox2 = new THREE.Box3().setFromCenterAndSize(
+    new THREE.Vector3(-80, 35, -80), 
+    new THREE.Vector3(12, 0.5, 30)
+);
+const platBox3 = new THREE.Box3().setFromCenterAndSize(
+    new THREE.Vector3(-80, 35, -80), 
+    new THREE.Vector3(30, 0.5, 12)
+);
+collidables.push(platBox, platBox2, platBox3);
 
 // Poste da Estação Corcovado (onde o bondinho para)
-createVoxel(-72, 45, -80, 1, 8, 1, matPlat, true, true);
+createVoxel(-72, 38, -80, 1, 8, 1, matPlat, true, true);
 
 // Estação Pão de Açúcar (y=30)
 // Plataforma estendida de -80 até -95 (para trás)
@@ -179,13 +223,9 @@ const plat2 = createVoxel(-40, 29.5, -87.5, 12, 0.5, 15, matPlat);
 collidables.push(new THREE.Box3().setFromObject(plat2));
 
 // Poste da Estação Pão de Açúcar
-createVoxel(-40, 33, -80, 1, 8, 1, matPlat, true, true);
+createVoxel(-40, 33, -90, 1, 8, 1, matPlat, true, true);
 
-// Escadas/Acesso interno Pão de Açúcar (Inicia na calçada da rua Z=-60 e sobe a montanha)
-for(let i=0; i<30; i++) {
-    const step = createVoxel(-40, i, -61-(i*0.65), 6, 1, 3, matPlat);
-    collidables.push(new THREE.Box3().setFromObject(step));
-}
+
 // Acesso ao Corcovado agora é APENAS via Bondinho.
 
 export let bondinhoP = 0;
