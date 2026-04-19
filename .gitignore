@@ -1,0 +1,45 @@
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.bak
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python (in case you use python scripts for local dev)
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Project temporary / scratch files
+scratch/
+test.html
+*.tmp
+*.temp
