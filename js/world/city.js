@@ -77,13 +77,11 @@ export function buildCity() {
         let rowIdx = 0;
         for (let bz = -half + BLOCK_SIZE / 2; bz < half; bz += BLOCK_SIZE) {
             rowIdx++;
-            const isMountainArea = (bx <= -20 && bz <= -60);
-            const isLakeArea = (bx >= 60 && bz >= 60);
-            const isHeliArea = (bx === 0 && bz === -40);
+            // Tudo agora é área de quarteirão
+            
+            
 
-            if (!isLakeArea) {
-                createVoxel(bx, 0.1, bz, blockW, 0.2, blockW, matSidewalk, true, true);
-            }
+
 
             // Verifica bloco customizado
             const blockKey = colIdx + '_' + rowIdx;
@@ -91,13 +89,14 @@ export function buildCity() {
             if (Object.hasOwn(window.customBlocks || {}, blockKey) && typeof customHandler === 'function') {
                 try {
                     customHandler({
-                        createVoxel, THREE, collidables, buildings,
+                        createVoxel, THREE, scene, collidables, buildings,
                         centerX: bx, centerZ: bz, blockW
                     });
                 } catch (e) {
                     console.error('Erro no bloco customizado ' + blockKey + ':', e);
                 }
-            } else if (!isMountainArea && !isLakeArea && !isHeliArea) {
+            } else {
+                createVoxel(bx, 0.1, bz, blockW, 0.2, blockW, matSidewalk, true, true);
                 if (Math.random() > 0.5) {
                     // Casa Térrea com Jardim
                     const h = 3.5 + Math.random() * 1.5; // Casa baixa (um andar)
@@ -132,6 +131,7 @@ export function buildCity() {
                         collidables.push(new THREE.Box3().setFromObject(lv));
                     }
                 } else {
+                createVoxel(bx, 0.1, bz, blockW, 0.2, blockW, matSidewalk, true, true);
                     // Praça com Árvores e Chafariz
                     // Gramado do terreno
                     createVoxel(bx, 0.2, bz, blockW - 2, 0.1, blockW - 2, matGrass, false, true);

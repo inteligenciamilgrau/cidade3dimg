@@ -40,6 +40,10 @@ export function setupInput(callbacks = {}) {
         if (k === 'v') callbacks.onToggleViewMode?.();
         if (k === 'e') callbacks.onFireBullet?.();
         if (k === 'r') callbacks.onRespawnRequest?.();
+        if (k === 'tab') {
+            e.preventDefault();
+            callbacks.onToggleMap?.();
+        }
     });
 
     document.addEventListener('keyup', (e) => {

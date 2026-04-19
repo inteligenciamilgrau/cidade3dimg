@@ -10,7 +10,7 @@ import { buildCity, collidables, roads } from './world/city.js';
 import { updateTrafficLights } from './world/trafficLights.js';
 import {
     boat, boatBox, bBase, duck, dLegL, dLegR,
-    bondinho, bondinhoBoxes, chBase, geminiSign
+    bondinho, bondinhoBoxes
 } from './world/landmarks.js';
 
 // ---- Entities ----

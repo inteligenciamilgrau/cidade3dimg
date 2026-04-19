@@ -4,7 +4,7 @@
 import { npcs } from '../entities/npcs.js';
 import { heli } from '../entities/vehicles.js';
 import { roads } from '../world/city.js';
-import { chBase, geminiSign } from '../world/landmarks.js';
+
 
 const ctxMinimap = document.getElementById('minimap').getContext('2d');
 
@@ -58,15 +58,12 @@ export function drawMinimap(pObj, yaw) {
     ctxMinimap.fillRect(hx * 0.5 - 3, hz * 0.5 - 3, 6, 6);
 
     // Cristo Redentor (cruz branca)
-    const cx = chBase.position.x - px, cz = chBase.position.z - pz;
-    ctxMinimap.fillStyle = '#ffffff';
-    ctxMinimap.fillRect(cx * 0.5 - 1, cz * 0.5 - 4, 2, 8);
-    ctxMinimap.fillRect(cx * 0.5 - 4, cz * 0.5 - 1, 8, 2);
-
-    // Placa Gemini (retângulo azul Google)
-    const gx = geminiSign.position.x - px, gz = geminiSign.position.z - pz;
-    ctxMinimap.fillStyle = '#4285F4';
-    ctxMinimap.fillRect(gx * 0.5 - 3, gz * 0.5 - 1.5, 6, 3);
+    if (window.christBase) {
+        const cx = window.christBase.position.x - px, cz = window.christBase.position.z - pz;
+        ctxMinimap.fillStyle = '#ffffff';
+        ctxMinimap.fillRect(cx * 0.5 - 1, cz * 0.5 - 4, 2, 8);
+        ctxMinimap.fillRect(cx * 0.5 - 4, cz * 0.5 - 1, 8, 2);
+    }
 
     ctxMinimap.restore();
 }
