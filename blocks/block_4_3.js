@@ -1,7 +1,7 @@
 // =========================================================================
-//  🗽  ESTÁTUA DA LIBERDADE (ULTRA-PROCEDURAL V7 - SMART ELEVATOR)  🗽 
+//  🗽  ESTÁTUA DA LIBERDADE (ULTRA-PROCEDURAL V8 - THE FINAL CUT)  🗽 
 //  --------------------------------------------------------------------
-//  "A Liberdade Iluminando o Mundo... e sem guilhotinar turistas!"
+//  "A Liberdade Iluminando o Mundo... agora com a placa no lugar certo!"
 // =========================================================================
 (function () {
     window.customBlocks = window.customBlocks || {};
@@ -31,6 +31,7 @@
         const matStairs = new THREE.MeshLambertMaterial({ color: 0x333333 });
         const matWater = new THREE.MeshLambertMaterial({ color: 0x1e5a7a, transparent: true, opacity: 0.8 });
 
+        // A função mágica que causou o sumiço da placa
         function vox(x, y, z, w, h, d, mat, collide = true) {
             const mesh = ctx.createVoxel(cx + x, y, cz + z, w, h, d, mat);
             if (collide) ctx.collidables.push(new THREE.Box3().setFromObject(mesh));
@@ -85,7 +86,6 @@
         vox(0, 16.1, 5.5, 4, 7, 1, matPedestal);
 
         const tetoY = 20.1;
-        // O furo principal da base: Garantimos espaço largo (6x6)
         vox(0, tetoY, -4.5, 12, 1, 3, matPedDark);
         vox(0, tetoY, 4.5, 12, 1, 3, matPedDark);
         vox(-4.5, tetoY, 0, 3, 1, 6, matPedDark);
@@ -137,21 +137,19 @@
         vox(tX, tY + 3.5, 0, 1.5, 3, 1.5, matFireCore, false);
 
         // =================================================================
-        //  5. CABEÇA E MIRANTE VIP (COM BURACO DE CHÃO ALARGADO)
+        //  5. CABEÇA E MIRANTE VIP
         // =================================================================
         const deckY = 48.6;
-        // CORREÇÃO: Furo do chão do mirante agora tem exatos 4x4, garantindo
-        // que o elevador de 3.2 de largura passe sem NENHUMA chance de te esmagar nas quinas.
-        vox(0, deckY, -3.5, 8, 0.2, 3, matPedDark); // Parte de trás
-        vox(0, deckY, 3.5, 8, 0.2, 3, matPedDark); // Parte da frente
-        vox(-3.5, deckY, 0, 3, 0.2, 4, matPedDark); // Esquerda
-        vox(3.5, deckY, 0, 3, 0.2, 4, matPedDark); // Direita
+        vox(0, deckY, -3.5, 8, 0.2, 3, matPedDark);
+        vox(0, deckY, 3.5, 8, 0.2, 3, matPedDark);
+        vox(-3.5, deckY, 0, 3, 0.2, 4, matPedDark);
+        vox(3.5, deckY, 0, 3, 0.2, 4, matPedDark);
 
         const hY = 51.2;
         vox(0, hY, -3.5, 6, 5, 1.5, matCopper);
         vox(-3.5, hY, 0, 1.5, 5, 6, matCopper);
         vox(3.5, hY, 0, 1.5, 5, 6, matCopper);
-        vox(0, hY + 1, 3.5, 6, 3, 0.6, matGlass, true); // Vidro Blindado Frontal
+        vox(0, hY + 1, 3.5, 6, 3, 0.6, matGlass, true);
 
         vox(0, hY + 3.5, 0, 6.5, 1.5, 6.5, matCopperDark);
         for (let i = 0; i < 7; i++) {
@@ -186,7 +184,6 @@
             const Y_TOP = 48.7;
 
             setInterval(() => {
-                // SENSOR DE PESO: Captura a posição da câmera do jogador
                 let pos = (ctx.camera && ctx.camera.position) || null;
                 let playerIsOnPlatform = false;
                 let playerIsWaitingAtTop = false;
@@ -196,12 +193,10 @@
                     let dz = Math.abs(pos.z - platform.position.z);
                     let dy = pos.y - platform.position.y;
 
-                    // Verifica se o jogador está em cima do elevador
                     if (dx < 1.6 && dz < 1.6 && dy >= 0 && dy < 3) {
                         playerIsOnPlatform = true;
                     }
 
-                    // Verifica se o jogador está preso lá no Mirante (chamando o elevador)
                     let distToCenter = Math.sqrt((pos.x - cx) ** 2 + (pos.z - cz) ** 2);
                     if (distToCenter < 5 && pos.y >= Y_TOP) {
                         playerIsWaitingAtTop = true;
@@ -224,30 +219,25 @@
                     }
                 } else if (state === 'WAIT_TOP') {
                     if (pos) {
-                        // SENSOR ATIVO: Se o jogador não estiver mais no topo, desce sozinho. 
-                        // Se o jogador estiver nele, espera um pouquinho e desce.
                         if (!playerIsWaitingAtTop || playerIsOnPlatform) {
                             timer += 16;
                             if (timer > 3000) state = 'DOWN';
                         } else {
-                            timer = 0; // Se o jogador está andando pelo mirante, o elevador o aguarda.
+                            timer = 0;
                         }
                     } else {
-                        // Fallback (se a engine não tiver camera API, vira elevador de shopping automático)
                         timer += 16;
                         if (timer > 6000) state = 'DOWN';
                     }
                 } else if (state === 'WAIT_BOTTOM') {
                     if (pos) {
-                        // SENSOR ATIVO: Sobe se o jogador pisar nele OU se ele pedir socorro do mirante
                         if (playerIsOnPlatform || playerIsWaitingAtTop) {
                             timer += 16;
                             if (timer > 1000) state = 'UP';
                         } else {
-                            timer = 0; // Fica de portas abertas esperando eternamente no lobby
+                            timer = 0;
                         }
                     } else {
-                        // Fallback automático
                         timer += 16;
                         if (timer > 4000) state = 'UP';
                     }
@@ -259,7 +249,7 @@
         initElevator();
 
         // =================================================================
-        //  7. PLACA DE ASSINATURA
+        //  7. PLACA DE ASSINATURA (CORRIGIDA)
         // =================================================================
         function renderStandardSign(monumentName, aiModel) {
             const canvas = document.createElement('canvas');
@@ -285,8 +275,10 @@
 
             const signMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) });
             const matDark = new THREE.MeshLambertMaterial({ color: 0x222222 });
-            let pX = cx - 10;
-            let pZ = cz + 12;
+
+            // CORREÇÃO AQUI: Coordenadas locais, pois a função vox já soma o centro da cidade!
+            let pX = -10;
+            let pZ = 12;
 
             vox(pX - 2.2, 1.8, pZ, 0.22, 2.8, 0.22, matDark);
             vox(pX + 2.2, 1.8, pZ, 0.22, 2.8, 0.22, matDark);
@@ -294,6 +286,6 @@
             vox(pX, 3.5, pZ + 0.12, 5.2, 1.8, 0.05, signMat);
         }
 
-        renderStandardSign('Estátua da Liberdade V2)', 'GEMINI 3.1 PRO');
+        renderStandardSign('Estátua da Liberdade (V2)', 'GEMINI 3.1 PRO');
     };
 })();

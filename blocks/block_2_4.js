@@ -5,16 +5,16 @@
 
 (function () {
     window.customBlocks = window.customBlocks || {};
-    
+
     window.customBlocks['2_4'] = function (ctx) {
         // ==========================================
         // 1. CONFIGURAÇÕES GERAIS E MATERIAIS
         // ==========================================
-        
+
         // Limites seguros: O quarteirão é 30x30. Vamos usar 26x26 para margem de segurança.
-        const buildingFootprint = 26; 
+        const buildingFootprint = 26;
         const halfSize = buildingFootprint / 2; // 13
-        
+
         // Materiais Premium
         const matGlass = new ctx.THREE.MeshLambertMaterial({ color: 0x44aaff, transparent: true, opacity: 0.8 });
         const matGlassDark = new ctx.THREE.MeshLambertMaterial({ color: 0x112233, transparent: true, opacity: 0.9 });
@@ -23,7 +23,7 @@
         const matGold = new ctx.THREE.MeshLambertMaterial({ color: 0xffd700 }); // Detalhes dourados
         const matLight = new ctx.THREE.MeshBasicMaterial({ color: 0x00ffff }); // Luzes Neon Ciano
         const matWater = new ctx.THREE.MeshLambertMaterial({ color: 0x0044aa, transparent: true, opacity: 0.6 });
-        
+
         // Material da Placa de Assinatura
         const matSignFrame = new ctx.THREE.MeshLambertMaterial({ color: 0x111111 });
         const matSignBg = new ctx.THREE.MeshLambertMaterial({ color: 0x000000 });
@@ -33,7 +33,7 @@
             const absX = ctx.centerX + x;
             const absZ = ctx.centerZ + z;
             const mesh = ctx.createVoxel(absX, y, absZ, w, h, d, material);
-            
+
             if (isCollidable) {
                 ctx.collidables.push(new ctx.THREE.Box3().setFromObject(mesh));
             }
@@ -52,12 +52,12 @@
             // Fundo
             c2.fillStyle = '#050505';
             c2.fillRect(0, 0, 1024, 256);
-            
+
             // Borda Neon
             c2.strokeStyle = '#00ffff';
             c2.lineWidth = 8;
             c2.strokeRect(0, 0, 1024, 256);
-            
+
             // Texto Título
             c2.fillStyle = '#ffffff';
             c2.textAlign = 'center';
@@ -81,7 +81,7 @@
             // Estrutura de suporte
             createVoxel(pX - 6, pY, pZ, 0.5, 5, 0.5, matSteel, true);
             createVoxel(pX + 6, pY, pZ, 0.5, 5, 0.5, matSteel, true);
-            
+
             // Painel
             createVoxel(pX, pY + 2.5, pZ, 12.5, 2.5, 0.2, matSignBg, false);
             createVoxel(pX, pY + 2.5, pZ + 0.15, 12.2, 2.2, 0.05, signMat, false);
@@ -94,7 +94,7 @@
         // --- BASE (Pedestal) ---
         // Altura 2, largura total do terreno seguro
         createVoxel(0, 1, 0, buildingFootprint, 2, buildingFootprint, matConcrete, true);
-        
+
         // Detalhe dourado na base
         createVoxel(0, 2.1, 0, buildingFootprint - 2, 0.2, buildingFootprint - 2, matGold, false);
 
@@ -106,10 +106,10 @@
 
         for (let i = 0; i < totalFloors; i++) {
             const yBase = 2 + (i * floorHeight);
-            
+
             // Núcleo Central (Elevadores/Escadas)
             createVoxel(0, yBase + 1.75, 0, 6, 3.5, 6, matSteel, true);
-            
+
             // Paredes Externas de Vidro
             // Frente e Trás
             createVoxel(0, yBase + 1.75, towerHalf, towerWidth, 3.5, 0.3, matGlass, false);
@@ -137,25 +137,25 @@
 
         // --- TOPO DA TORRE (Coroa) ---
         const roofY = 2 + (totalFloors * floorHeight);
-        
+
         // Estrutura superior mais estreita
         createVoxel(0, roofY + 4, 0, 12, 8, 12, matGlassDark, false);
-        
+
         // Antena Central
         createVoxel(0, roofY + 10, 0, 1, 15, 1, matSteel, false);
         createVoxel(0, roofY + 25, 0, 0.5, 2, 0.5, matLight, false); // Luz piscante no topo
 
         // Anel de observação no topo
         createVoxel(0, roofY + 8, 0, 14, 0.5, 14, matGold, false);
-        
+
         // Piscina infinita no terraço (Nível intermediário do topo)
         createVoxel(0, roofY + 4.8, 0, 10, 0.4, 10, matWater, false);
 
         // --- PAISAGISMO E ENTRADA ---
-        
+
         // Espelho d'água na entrada (frente)
         createVoxel(0, 0.1, halfSize + 4, 16, 0.2, 6, matWater, false);
-        
+
         // Caminho de pedestres
         createVoxel(0, 0.15, halfSize + 1, 4, 0.1, 10, matConcrete, true);
 
@@ -164,7 +164,7 @@
             // Tronco
             createVoxel(x, 1.5, z, 0.8, 3, 0.8, matConcrete, true);
             // Copa (formato simples de voxel)
-            createVoxel(x, 3.5, z, 2.5, 2.5, 2.5, new ctx.THREE.MeshLambertMaterial({color: 0x228822}), false);
+            createVoxel(x, 3.5, z, 2.5, 2.5, 2.5, new ctx.THREE.MeshLambertMaterial({ color: 0x228822 }), false);
         }
 
         plantTree(-halfSize + 2, -halfSize + 2);
@@ -183,7 +183,7 @@
         // ==========================================
         // 4. REGISTRO NO MINIMAPA E ASSINATURA
         // ==========================================
-        
+
         ctx.buildings.push({
             x: ctx.centerX,
             z: ctx.centerZ,
@@ -194,6 +194,6 @@
         });
 
         // Colocar a assinatura final
-        renderSignaturePlate("O OBSERVATÓRIO QWEN", "Qwen 3.5 Omni Plus");
+        renderSignaturePlate("O OBSERVATÓRIO QWEN (V2)", "Qwen 3.5 Omni Plus");
     };
 })();
