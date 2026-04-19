@@ -358,13 +358,12 @@ function update() {
         else heliVelocity.y *= 0.9;
         heliVelocity.x *= 0.96; heliVelocity.z *= 0.96;
 
-        const cH = heli.position.clone(); cH.y += 1;
         const sH = new THREE.Vector3(2, 2, 4);
         let hBox;
         ['x', 'z', 'y'].forEach(axis => {
             const old = heli.position[axis];
             heli.position[axis] += heliVelocity[axis] * dt;
-            cH[axis] = heli.position[axis];
+            const cH = heli.position.clone(); cH.y += 1;
             hBox = new THREE.Box3().setFromCenterAndSize(cH, sH);
             let hit = false;
             for (const c of collidables) { if (checkCollision(hBox, c)) { hit = true; break; } }
@@ -429,7 +428,9 @@ function update() {
                 offset = new THREE.Vector3(bX * 10, 5, bZ * 10).applyAxisAngle(new THREE.Vector3(bZ, 0, -bX), -pitch);
             }
             camera.position.copy(vMesh.position).add(offset);
-            camera.lookAt(vMesh.position);
+            const lookTarget = vMesh.position.clone();
+            if (gameState.currentVehicle === heli) lookTarget.y += 3;
+            camera.lookAt(lookTarget);
         }
     } else {
         const offset = new THREE.Vector3(0, 3 + cameraZoom, 4 * cameraZoom).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
