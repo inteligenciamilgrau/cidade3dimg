@@ -266,11 +266,21 @@
             c2.fillStyle = '#eef7ff';
             c2.textAlign = 'center';
             c2.textBaseline = 'middle';
-            c2.font = 'bold 45px Arial';
+            let f1 = 45;
+            c2.font = 'bold ' + f1 + 'px Arial';
+            while (c2.measureText(monumentName).width > 470 && f1 > 15) {
+                f1 -= 2;
+                c2.font = 'bold ' + f1 + 'px Arial';
+            }
             c2.fillText(monumentName, 256, 78);
 
             c2.fillStyle = '#ffd700';
-            c2.font = 'italic bold 32px Arial';
+            let f2 = 32;
+            c2.font = 'italic bold ' + f2 + 'px Arial';
+            while (c2.measureText(aiModel).width > 470 && f2 > 10) {
+                f2 -= 2;
+                c2.font = 'italic bold ' + f2 + 'px Arial';
+            }
             c2.fillText(aiModel, 256, 132);
 
             const signMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) });

@@ -62,12 +62,22 @@
             c2.fillStyle = '#ffffff';
             c2.textAlign = 'center';
             c2.textBaseline = 'middle';
-            c2.font = 'bold 80px "Courier New", monospace';
+            let f1 = 80;
+            c2.font = 'bold ' + f1 + 'px "Courier New", monospace';
+            while (c2.measureText(title).width > 950 && f1 > 20) {
+                f1 -= 2;
+                c2.font = 'bold ' + f1 + 'px "Courier New", monospace';
+            }
             c2.fillText(title, 512, 90);
 
             // Texto Autor
             c2.fillStyle = '#00ffff';
-            c2.font = 'bold 50px "Arial", sans-serif';
+            let f2 = 50;
+            c2.font = 'bold ' + f2 + 'px "Arial", sans-serif';
+            while (c2.measureText(author).width > 950 && f2 > 15) {
+                f2 -= 2;
+                c2.font = 'bold ' + f2 + 'px "Arial", sans-serif';
+            }
             c2.fillText(author, 512, 170);
 
             const texture = new ctx.THREE.CanvasTexture(canvas);
