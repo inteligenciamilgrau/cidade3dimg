@@ -76,7 +76,21 @@ baseMesh.position.set(0, 0.75, -40);
 // Rotaciona para que uma das faces fique reta com a escada
 baseMesh.rotation.y = Math.PI / 8;
 scene.add(baseMesh);
-collidables.push(new THREE.Box3().setFromObject(baseMesh));
+// Caixas de colisão customizadas (3 caixas sobrepostas) para simular o formato de octógono / hexágono
+// Isso remove o "canto invisível" do antigo quadrado gigante
+const boxX = new THREE.Box3().setFromCenterAndSize(
+    new THREE.Vector3(0, 0.75, -40),
+    new THREE.Vector3(14.6, 1.5, 6.0)
+);
+const boxZ = new THREE.Box3().setFromCenterAndSize(
+    new THREE.Vector3(0, 0.75, -40),
+    new THREE.Vector3(6.0, 1.5, 14.6)
+);
+const boxMid = new THREE.Box3().setFromCenterAndSize(
+    new THREE.Vector3(0, 0.75, -40),
+    new THREE.Vector3(11.2, 1.5, 11.2)
+);
+collidables.push(boxX, boxZ, boxMid);
 
 // Escadinha baixa
 const stairH = createVoxel(0, 0.375, -32, 3, 0.75, 1.5, matRoad);

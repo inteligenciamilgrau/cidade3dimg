@@ -52,7 +52,7 @@ const gameState = {
     timerActive: true,
 };
 
-let pitch = 0, yaw = 0;
+let pitch = 0, yaw = Math.PI; // Rotacionado 180 para olhar a cidade
 let pOnGround = false;
 const velocity = new THREE.Vector3();
 

@@ -98,23 +98,56 @@ export function buildCity() {
                     console.error('Erro no bloco customizado ' + blockKey + ':', e);
                 }
             } else if (!isMountainArea && !isLakeArea && !isHeliArea) {
-                if (Math.random() > 0.2) {
-                    const h = 10 + Math.random() * 30;
-                    const bw = blockW - 4;
+                if (Math.random() > 0.5) {
+                    // Casa Térrea com Jardim
+                    const h = 3.5 + Math.random() * 1.5; // Casa baixa (um andar)
+                    const bw = blockW - 10; // Deixa 5 de jardim de cada lado
+                    
+                    // Gramado do terreno (jardim)
+                    createVoxel(bx, 0.2, bz, blockW - 2, 0.1, blockW - 2, matGrass, false, true);
+
                     const m = matBuilding[Math.floor(Math.random() * matBuilding.length)];
                     const b = createVoxel(bx, h / 2, bz, bw, h, bw, m);
                     collidables.push(new THREE.Box3().setFromObject(b));
                     buildings.push(b);
-                    for (let wy = 5; wy < h; wy += 5) {
-                        for (let wx = -bw / 2 + 2; wx <= bw / 2 - 2; wx += 4) {
-                            createVoxel(bx + wx, wy, bz + bw / 2 + 0.1, 2, 2, 0.1, matWindows, false, false);
-                            createVoxel(bx + wx, wy, bz - bw / 2 - 0.1, 2, 2, 0.1, matWindows, false, false);
-                        }
+
+                    // Telhado
+                    const matRoof = new THREE.MeshLambertMaterial({ color: 0x8b3a3a }); // Telha vermelha
+                    const roof = createVoxel(bx, h + 0.5, bz, bw + 1, 1, bw + 1, matRoof);
+                    collidables.push(new THREE.Box3().setFromObject(roof));
+
+                    // Algumas janelas nas paredes laterais
+                    for (let wx = -bw / 2 + 2; wx <= bw / 2 - 2; wx += 4) {
+                        createVoxel(bx + wx, 2.0, bz + bw / 2 + 0.1, 1.5, 1.5, 0.1, matWindows, false, false);
+                        createVoxel(bx + wx, 2.0, bz - bw / 2 - 0.1, 1.5, 1.5, 0.1, matWindows, false, false);
+                    }
+
+                    // Duas arvorezinhas pequenas no quintal
+                    for (let t = 0; t < 2; t++) {
+                        const tx = bx + (Math.random() > 0.5 ? 1 : -1) * (bw / 2 + 2);
+                        const tz = bz + (Math.random() > 0.5 ? 1 : -1) * (bw / 2 + 2);
+                        const trunk = createVoxel(tx, 1.5, tz, 0.6, 3, 0.6, matTrunk);
+                        collidables.push(new THREE.Box3().setFromObject(trunk));
+                        const lv = createVoxel(tx, 3.5, tz, 2.5, 2.5, 2.5, matLeaves);
+                        collidables.push(new THREE.Box3().setFromObject(lv));
                     }
                 } else {
-                    for (let t = 0; t < 3; t++) {
-                        const tx = bx + (Math.random() - 0.5) * (blockW - 4);
-                        const tz = bz + (Math.random() - 0.5) * (blockW - 4);
+                    // Praça com Árvores e Chafariz
+                    // Gramado do terreno
+                    createVoxel(bx, 0.2, bz, blockW - 2, 0.1, blockW - 2, matGrass, false, true);
+                    
+                    // Chafariz simples no centro (Voxel cinza e azul)
+                    createVoxel(bx, 0.5, bz, 4, 0.8, 4, new THREE.MeshLambertMaterial({color: 0x999999}));
+                    const agua = createVoxel(bx, 1.0, bz, 3.5, 0.5, 3.5, new THREE.MeshLambertMaterial({color: 0x3388ff}));
+                    collidables.push(new THREE.Box3().setFromObject(agua));
+
+                    // Várias árvores maiores na praça
+                    for (let t = 0; t < 4; t++) {
+                        const tx = bx + (Math.random() - 0.5) * (blockW - 8);
+                        const tz = bz + (Math.random() - 0.5) * (blockW - 8);
+                        // Evita plantar em cima do chafariz
+                        if (Math.abs(tx - bx) < 3 && Math.abs(tz - bz) < 3) continue;
+                        
                         const trunk = createVoxel(tx, 2, tz, 1, 4, 1, matTrunk);
                         collidables.push(new THREE.Box3().setFromObject(trunk));
                         const lv = createVoxel(tx, 5, tz, 4, 4, 4, matLeaves);
