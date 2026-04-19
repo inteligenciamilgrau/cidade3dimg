@@ -87,9 +87,10 @@ export function buildCity() {
 
             // Verifica bloco customizado
             const blockKey = colIdx + '_' + rowIdx;
-            if (window.customBlocks && window.customBlocks[blockKey]) {
+            const customHandler = window.customBlocks && window.customBlocks[blockKey];
+            if (Object.hasOwn(window.customBlocks || {}, blockKey) && typeof customHandler === 'function') {
                 try {
-                    window.customBlocks[blockKey]({
+                    customHandler({
                         createVoxel, THREE, collidables, buildings,
                         centerX: bx, centerZ: bz, blockW
                     });

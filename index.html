@@ -169,28 +169,28 @@
     </div>
 
     <!-- ===================== SCRIPTS ===================== -->
-    <!-- Carregador de blocos customizados — sem erros 404 no console -->
+    <!-- Carregador de blocos customizados com allowlist explícita -->
     <script type="module">
         window.customBlocks = window.customBlocks || {};
+        window.allowedCustomBlocks = Object.freeze([
+            // Exemplo: 'block_1_3.js',
+            // Adicione aqui apenas arquivos confiáveis em /blocks
+        ]);
 
         async function loadBlocks() {
-            for (let col = 1; col <= 5; col++) {
-                for (let row = 1; row <= 5; row++) {
-                    const url = `blocks/block_${col}_${row}.js`;
-                    try {
-                        const res = await fetch(url);
-                        if (!res.ok) continue; // 404 ou outro erro → pula silenciosamente
-                        // Injeta como script apenas se o arquivo existir
-                        await new Promise((resolve) => {
-                            const s = document.createElement('script');
-                            s.src = url;
-                            s.onload = resolve;
-                            s.onerror = resolve; // mesmo assim nunca bloqueia
-                            document.head.appendChild(s);
-                        });
-                    } catch (_) {
-                        // Erro de rede → ignora silenciosamente
-                    }
+            for (const fileName of window.allowedCustomBlocks) {
+                if (!/^block_[1-5]_[1-5]\.js$/.test(fileName)) continue;
+                const url = `blocks/${fileName}`;
+                try {
+                    await new Promise((resolve, reject) => {
+                        const s = document.createElement('script');
+                        s.src = url;
+                        s.onload = resolve;
+                        s.onerror = reject;
+                        document.head.appendChild(s);
+                    });
+                } catch (err) {
+                    console.error('Falha ao carregar bloco allowlisted:', fileName, err);
                 }
             }
         }
