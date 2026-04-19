@@ -55,3 +55,24 @@ export function showPauseScreen() {
 export function hidePauseScreen() {
     document.getElementById('startScreen').style.display = 'none';
 }
+
+export function showRespawnScreen() {
+    document.getElementById('respawnScreen').style.display = 'block';
+    if (document.exitPointerLock) document.exitPointerLock();
+}
+
+export function hideRespawnScreen() {
+    document.getElementById('respawnScreen').style.display = 'none';
+    if (document.body.requestPointerLock) document.body.requestPointerLock();
+}
+
+export function setupRespawnEvents(onConfirm, onCancel) {
+    document.getElementById('respawnConfirmBtn').addEventListener('click', () => {
+        hideRespawnScreen();
+        onConfirm();
+    });
+    document.getElementById('respawnCancelBtn').addEventListener('click', () => {
+        hideRespawnScreen();
+        if (onCancel) onCancel();
+    });
+}

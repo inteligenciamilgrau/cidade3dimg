@@ -3,7 +3,7 @@
 // =====================================================================
 import { THREE, scene } from '../core/renderer.js';
 import { createVoxel } from '../core/voxel.js';
-import { matWater, matWood, matSkin } from '../core/materials.js';
+import { matWater, matWood, matSkin, matGrass } from '../core/materials.js';
 import { collidables } from './city.js';
 
 // ---- Lago (Pond) ----
@@ -94,7 +94,8 @@ for (let i = 0; i < paoLevels; i++) {
     const s = 20 - i * (20 / paoLevels);
     const h = 30 / paoLevels;
     const y = i * h + h / 2;
-    const layer = createVoxel(-40, y, -120, s, h, s, mountainMat);
+    // Movido de -120 para -90 para ficar totalmente dentro do mapa
+    const layer = createVoxel(-40, y, -80, s, h, s, mountainMat);
     collidables.push(new THREE.Box3().setFromObject(layer));
 }
 
@@ -116,20 +117,76 @@ function addBPart(x, y, z, w, h, d, mat, isCol) {
     }
 }
 
-addBPart(0, 0.1, 0, 4, 0.2, 5, matBondinho, true);
-addBPart(0, 3.9, 0, 4, 0.2, 5, matBondinho, true);
-addBPart(-1.9, 1, 0, 0.2, 2, 5, matBondinho, true);
-addBPart(-1.9, 2.5, 0, 0.2, 1, 5, matGlass, true);
-addBPart(-1.9, 3.5, 0, 0.2, 1, 5, matBondinho, true);
-addBPart(1.9, 1, 0, 0.2, 2, 5, matBondinho, true);
-addBPart(1.9, 2.5, 0, 0.2, 1, 5, matGlass, true);
-addBPart(1.9, 3.5, 0, 0.2, 1, 5, matBondinho, true);
-addBPart(-1.4, 2, -2.4, 1.2, 4, 0.2, matBondinho, true);
-addBPart(1.4, 2, -2.4, 1.2, 4, 0.2, matBondinho, true);
-addBPart(0, 3.5, -2.4, 1.6, 1, 0.2, matBondinho, true);
-addBPart(-1.4, 2, 2.4, 1.2, 4, 0.2, matBondinho, true);
-addBPart(1.4, 2, 2.4, 1.2, 4, 0.2, matBondinho, true);
-addBPart(0, 3.5, 2.4, 1.6, 1, 0.2, matBondinho, true);
+// Base e Teto maiores (5x6, altura 5)
+addBPart(0, 0.1, 0, 5, 0.2, 6, matBondinho, true);
+addBPart(0, 4.9, 0, 5, 0.2, 6, matBondinho, true);
+
+// Pilastras nos 4 cantos
+addBPart(-2.4, 2.5, -2.9, 0.2, 5, 0.2, matBondinho, true);
+addBPart(2.4, 2.5, -2.9, 0.2, 5, 0.2, matBondinho, true);
+addBPart(-2.4, 2.5, 2.9, 0.2, 5, 0.2, matBondinho, true);
+addBPart(2.4, 2.5, 2.9, 0.2, 5, 0.2, matBondinho, true);
+
+// Paredes mínimas (apenas faixas nos cantos) para portas GIGANTES nos 4 lados
+// Lado Esquerdo (X-) - Apenas 0.8 de largura nos cantos
+addBPart(-2.4, 2.5, -2.6, 0.2, 5, 0.8, matGlass, true);
+addBPart(-2.4, 2.5, 2.6, 0.2, 5, 0.8, matGlass, true);
+// Lado Direito (X+)
+addBPart(2.4, 2.5, -2.6, 0.2, 5, 0.8, matGlass, true);
+addBPart(2.4, 2.5, 2.6, 0.2, 5, 0.8, matGlass, true);
+// Lado Frente (Z+)
+addBPart(-2.1, 2.5, 2.9, 0.8, 5, 0.2, matGlass, true);
+addBPart(2.1, 2.5, 2.9, 0.8, 5, 0.2, matGlass, true);
+// Lado Trás (Z-)
+addBPart(-2.1, 2.5, -2.9, 0.8, 5, 0.2, matGlass, true);
+addBPart(2.1, 2.5, -2.9, 0.8, 5, 0.2, matGlass, true);
+
+// Suporte para o cabo (mais alto agora: altura 5 + 2.3 = 7.3)
+addBPart(0, 6.1, 0, 0.4, 2.5, 0.4, matWood, false);
+addBPart(0, 7.3, 0, 1, 0.2, 1, matWood, false);
+
+// ---- Cabo do Bondinho ----
+// Conectando os dois extremos (Corcovado STATION e Pão de Açúcar)
+const p1 = new THREE.Vector3(-72, 42, -80);  // Estação Corcovado
+const p2 = new THREE.Vector3(-40, 30, -80);  // Estação Pão de Açúcar
+const dist = p1.distanceTo(p2);
+const cableMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(0.2, 0.2, dist),
+    new THREE.MeshLambertMaterial({ color: 0x333333 })
+);
+cableMesh.position.copy(p1).add(p2).multiplyScalar(0.5);
+cableMesh.position.y += 7.3; // Alinhado com o suporte
+cableMesh.lookAt(p2);
+scene.add(cableMesh);
+
+// ---- Estações do Bondinho ----
+const matPlat = new THREE.MeshLambertMaterial({ color: 0x555555 });
+
+// Estação Corcovado (Plataforma Panorâmica Gigante ao redor do Cristo)
+const plat1 = createVoxel(-80, 41.5, -80, 24, 0.5, 24, matPlat);
+collidables.push(new THREE.Box3().setFromObject(plat1));
+
+// Gramado ao redor do Cristo
+const grassCorc = createVoxel(-80, 41.8, -80, 22, 0.2, 22, matGrass);
+collidables.push(new THREE.Box3().setFromObject(grassCorc));
+
+// Poste da Estação Corcovado (onde o bondinho para)
+createVoxel(-72, 45, -80, 1, 8, 1, matPlat, true, true);
+
+// Estação Pão de Açúcar (y=30)
+// Plataforma estendida de -80 até -95 (para trás)
+const plat2 = createVoxel(-40, 29.5, -87.5, 12, 0.5, 15, matPlat);
+collidables.push(new THREE.Box3().setFromObject(plat2));
+
+// Poste da Estação Pão de Açúcar
+createVoxel(-40, 33, -80, 1, 8, 1, matPlat, true, true);
+
+// Escadas/Acesso interno Pão de Açúcar (Inicia na calçada da rua Z=-60 e sobe a montanha)
+for(let i=0; i<30; i++) {
+    const step = createVoxel(-40, i, -61-(i*0.65), 6, 1, 3, matPlat);
+    collidables.push(new THREE.Box3().setFromObject(step));
+}
+// Acesso ao Corcovado agora é APENAS via Bondinho.
 
 export let bondinhoP = 0;
 // bBase exportado para colisão dinâmica do barco

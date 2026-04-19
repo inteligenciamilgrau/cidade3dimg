@@ -39,6 +39,7 @@ export function setupInput(callbacks = {}) {
         if (k === 'f') callbacks.onToggleVehicle?.();
         if (k === 'v') callbacks.onToggleViewMode?.();
         if (k === 'e') callbacks.onFireBullet?.();
+        if (k === 'r') callbacks.onRespawnRequest?.();
     });
 
     document.addEventListener('keyup', (e) => {

@@ -29,7 +29,7 @@ import { updateDayNight, dayTime } from './systems/dayNight.js';
 import { health, updateHealthDisplay, gameOver, setupTimerToggle } from './ui/hud.js';
 import { setupPhoneEvents, renderContacts, phoneContacts } from './ui/phone.js';
 import { setupAdminEvents, openAdminPanel, closeAdminPanel, adminOpen } from './ui/admin.js';
-import { setupScreens, showPauseScreen, hidePauseScreen } from './ui/screens.js';
+import { setupScreens, showPauseScreen, hidePauseScreen, showRespawnScreen, setupRespawnEvents } from './ui/screens.js';
 import { createVoxel, checkCollision, showMsg } from './core/voxel.js';
 import { matSkin, matShirt, matPants } from './core/materials.js';
 import { CITY_SIZE, NPC_COUNT, NPC_SPECIALS, CAR_COUNT, PLAYER_SPEED, PLAYER_SPEED_RUN, PLAYER_JUMP_FORCE, GRAVITY, STEP_HEIGHT, GAME_TIME_START } from './config.js';
@@ -52,7 +52,7 @@ const gameState = {
     timerActive: true,
 };
 
-let pitch = 0, yaw = Math.PI; // Rotacionado 180 para olhar a cidade
+let pitch = 0, yaw = Math.PI * 0.5; // Iniciando virado para o heliporto/centro
 let pOnGround = false;
 const velocity = new THREE.Vector3();
 
@@ -61,7 +61,7 @@ buildCity();
 
 // ---- Player ----
 const player = new THREE.Group();
-player.position.set(-40, 5, -80); // Spawn no centro do quarteirão 2_2
+player.position.set(10, 2, 0); // Spawn perto do heliporto (centro)
 scene.add(player);
 
 const pBody = createVoxel(0, 1.5, 0, 1, 1, 0.5, matShirt);
@@ -94,7 +94,7 @@ pickNewMission();
 try { for (let i = 0; i < CAR_COUNT; i++) spawnCar(); } catch (e) { console.error('Erro ao spawnar carros:', e); }
 
 // ---- Animações de Landmarks ----
-let bondinhoP = 0, boatP = 0, duckP = 0;
+let bondinhoP = 0, boatP = 0, duckP = 0, bondinhoWait = 0;
 
 // =====================================================================
 // Controles de Veículo / Player
@@ -196,8 +196,13 @@ setupInput({
     },
     onEscape: (e) => {
         if (gameState.isPaused) { gameState.isPaused = false; hidePauseScreen(); document.getElementById('hud').style.display = 'block'; try { document.body.requestPointerLock(); } catch (err) { } }
-        else if (gameState.phoneOpen) { gameState.closingPhone = true; gameState.phoneOpen = false; document.getElementById('phoneScreen').style.display = 'none'; }
-        else if (adminOpen) { gameState.closingPhone = true; closeAdminPanel(); }
+        else if (gameState.phoneOpen) { gameState.closingPhone = false; gameState.phoneOpen = false; document.getElementById('phoneScreen').style.display = 'none'; document.body.requestPointerLock(); }
+        else if (adminOpen) { gameState.closingPhone = false; closeAdminPanel(); document.body.requestPointerLock(); }
+    },
+    onRespawnRequest: () => {
+        if (gameState.isPlaying && !gameState.isPaused && !gameState.phoneOpen && !adminOpen) {
+            showRespawnScreen();
+        }
     },
     onMouseMove: (mx, my) => {
         if (gameState.isPlaying && !gameState.isPaused && !gameState.phoneOpen) {
@@ -248,6 +253,26 @@ setupScreens({
 setupPhoneEvents();
 setupAdminEvents();
 setupTimerToggle(gameState);
+
+// Configuração do Respawn
+setupRespawnEvents(() => {
+    // Ação ao confirmar: Teleporta para o spawn perto do heliporto
+    const spawnPos = new THREE.Vector3(10, 2, 0);
+    
+    if (gameState.currentVehicle) {
+        const v = gameState.currentVehicle;
+        v.mesh.position.copy(spawnPos);
+        v.mesh.position.y = 5;
+        if (v.mesh.name === 'helicopter') v.mesh.position.y = 20;
+        player.position.copy(v.mesh.position);
+        if (v.mesh.name === 'helicopter') player.position.y += 1;
+    } else {
+        player.position.copy(spawnPos);
+    }
+    yaw = Math.PI; // Face a cidade
+    velocity.set(0, 0, 0);
+    showMsg("Respawn realizado!", 2000);
+});
 
 // =====================================================================
 // Loop Principal
@@ -451,9 +476,25 @@ function update() {
     updateParticles(dt);
 
     // Landmarks animados
-    bondinhoP += dt * 0.2;
+    if (bondinhoWait > 0) {
+        bondinhoWait -= dt;
+    } else {
+        const oldP = bondinhoP;
+        bondinhoP += dt * 0.2;
+        // Verifica se cruzou o pico (pi/2 ou 3pi/2) para pausar
+        // sin(old) < 0.99 && sin(new) >= 0.99 ou similar
+        if ((Math.sin(oldP) < 0.999 && Math.sin(bondinhoP) >= 0.999) || 
+            (Math.sin(oldP) > -0.999 && Math.sin(bondinhoP) <= -0.999)) {
+            bondinhoWait = 5; // Pausa de 5 segundos
+        }
+    }
+
     const oldBP = bondinho.position.clone();
-    bondinho.position.set(-60 + Math.sin(bondinhoP) * 20, 25 + Math.sin(bondinhoP) * 5, -100 - Math.sin(bondinhoP) * 15);
+    bondinho.position.set(
+        -56 + Math.sin(bondinhoP) * 16, 
+        36 - Math.sin(bondinhoP) * 6, 
+        -80
+    );
     const bDelta = bondinho.position.clone().sub(oldBP);
     bondinhoBoxes.forEach(b => b.box.setFromObject(b.mesh));
     if (!gameState.currentVehicle && player.position.distanceTo(bondinho.position) < 4 &&
