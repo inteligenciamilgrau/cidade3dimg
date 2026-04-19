@@ -1,7 +1,7 @@
 // blocks/block_2_4.js
-(function() {
+(function () {
     window.customBlocks = window.customBlocks || {};
-    window.customBlocks['2_4'] = function(ctx) {
+    window.customBlocks['2_4'] = function (ctx) {
 
         // === FUNÇÃO PADRÃO DE PLACA ===
         function renderStandardSign(monumentName, aiModel) {
@@ -14,7 +14,7 @@
             c2.strokeStyle = '#6fd3ff';
             c2.lineWidth = 10;
             c2.strokeRect(10, 10, 492, 172);
-            
+
             c2.fillStyle = '#eef7ff';
             c2.textAlign = 'center';
             c2.textBaseline = 'middle';
@@ -25,7 +25,7 @@
                 c2.font = 'bold ' + f1 + 'px Arial';
             }
             c2.fillText(monumentName, 256, 78);
-            
+
             let f2 = 34;
             c2.font = 'bold ' + f2 + 'px Arial';
             while (c2.measureText(aiModel).width > 470 && f2 > 15) {
@@ -63,7 +63,7 @@
             const absX = ctx.centerX + lx;
             const absZ = ctx.centerZ + lz;
             const mesh = ctx.createVoxel(absX, ly, absZ, w, h, d, material);
-            
+
             if (collide) {
                 ctx.collidables.push(new ctx.THREE.Box3().setFromObject(mesh));
             }
@@ -73,26 +73,26 @@
         // === HELPER PARA LETRAS EM VOXEL ===
         function createLetter(baseX, baseY, baseZ, letter) {
             const letters = {
-                'Q': [[1,1,1,0],[1,0,0,1],[1,0,0,1],[1,1,1,0],[0,0,0,1]],
-                'w': [[1,0,0,0,1],[1,0,0,0,1],[1,0,1,0,1],[1,1,0,1,1],[0,0,0,0,0]],
-                'e': [[0,1,1,0],[1,0,0,1],[1,1,1,1],[1,0,0,0],[0,1,1,0]],
-                'n': [[1,0,1,1],[1,1,0,1],[1,0,0,1],[1,0,0,1],[1,0,0,1]],
-                '3': [[1,1,1,0],[1,0,0,1],[0,1,1,0],[1,0,0,1],[0,1,1,0]],
-                '5': [[1,1,1,1],[1,0,0,0],[1,1,1,0],[0,0,0,1],[1,1,1,0]],
-                '.': [[0,0,0],[0,0,0],[0,0,1]],
-                '-': [[0,0,0,0],[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
-                'P': [[1,1,1,0],[1,0,0,1],[1,1,1,0],[1,0,0,0],[1,0,0,0]],
-                'l': [[0,1,0],[0,1,0],[0,1,0],[0,1,0],[0,1,0]],
-                'u': [[1,0,1],[1,0,1],[1,0,1],[1,0,1],[0,1,1]],
-                's': [[0,1,1,0],[1,0,0,0],[0,1,1,0],[0,0,0,1],[1,1,1,0]]
+                'Q': [[1, 1, 1, 0], [1, 0, 0, 1], [1, 0, 0, 1], [1, 1, 1, 0], [0, 0, 0, 1]],
+                'w': [[1, 0, 0, 0, 1], [1, 0, 0, 0, 1], [1, 0, 1, 0, 1], [1, 1, 0, 1, 1], [0, 0, 0, 0, 0]],
+                'e': [[0, 1, 1, 0], [1, 0, 0, 1], [1, 1, 1, 1], [1, 0, 0, 0], [0, 1, 1, 0]],
+                'n': [[1, 0, 1, 1], [1, 1, 0, 1], [1, 0, 0, 1], [1, 0, 0, 1], [1, 0, 0, 1]],
+                '3': [[1, 1, 1, 0], [1, 0, 0, 1], [0, 1, 1, 0], [1, 0, 0, 1], [0, 1, 1, 0]],
+                '5': [[1, 1, 1, 1], [1, 0, 0, 0], [1, 1, 1, 0], [0, 0, 0, 1], [1, 1, 1, 0]],
+                '.': [[0, 0, 0], [0, 0, 0], [0, 0, 1]],
+                '-': [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+                'P': [[1, 1, 1, 0], [1, 0, 0, 1], [1, 1, 1, 0], [1, 0, 0, 0], [1, 0, 0, 0]],
+                'l': [[0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0]],
+                'u': [[1, 0, 1], [1, 0, 1], [1, 0, 1], [1, 0, 1], [0, 1, 1]],
+                's': [[0, 1, 1, 0], [1, 0, 0, 0], [0, 1, 1, 0], [0, 0, 0, 1], [1, 1, 1, 0]]
             };
-            
+
             const pattern = letters[letter];
             if (!pattern) return;
-            
+
             const pixelSize = 0.35;
             const spacing = 0.4;
-            
+
             for (let row = 0; row < pattern.length; row++) {
                 for (let col = 0; col < pattern[row].length; col++) {
                     if (pattern[row][col] === 1) {
@@ -175,7 +175,7 @@
         createBlock(signX, signY + 1.5, signZ, 12, 0.3, 0.5, matDark, true);
         createBlock(signX - 5.5, signY - 1, signZ, 0.5, 5, 0.5, matDark, true);
         createBlock(signX + 5.5, signY - 1, signZ, 0.5, 5, 0.5, matDark, true);
-        
+
         // Fundo da placa (laranja)
         createBlock(signX, signY, signZ, 11, 2.5, 0.5, matSign, false);
 
@@ -204,7 +204,7 @@
         createBlock(-5, 1, -5, 4, 1.5, 2, matWood, true);
         createBlock(-10, 1, -10, 1.5, 3, 1.5, matGreen, false);
         createBlock(5, 1, 5, 4, 1, 2, matDark, true);
-        createBlock(0, 0.6, 0, 6, 0.1, 4, new ctx.THREE.MeshLambertMaterial({color: 0xaa0000}), false);
+        createBlock(0, 0.6, 0, 6, 0.1, 4, new ctx.THREE.MeshLambertMaterial({ color: 0xaa0000 }), false);
 
         createBlock(-6, 5, -6, 3, 1, 4, matWood, true);
         createBlock(-4, 5, -6, 1, 1, 1, matDark, true);
@@ -231,6 +231,6 @@
             color: 0xcccccc
         });
 
-        renderStandardSign('PREDIO EMPRESARIAL', 'GPT 4');
+        renderStandardSign('PREDIO de 3 Andares', 'Qwen 3.5-Plus');
     };
 })();
