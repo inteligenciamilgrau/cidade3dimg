@@ -7,9 +7,53 @@
 //  de sua esposa Mumtaz Mahal. Construído aqui em voxels pelo Claude
 //  para a posteridade da humanidade digital.
 // =========================================================================
-(function() {
+(function () {
     window.customBlocks = window.customBlocks || {};
-    window.customBlocks['3_3'] = function(ctx) {
+    window.customBlocks['3_3'] = function (ctx) {
+
+        // === FUNÇÃO PADRÃO DE PLACA ===
+        function renderStandardSign(monumentName, aiModel) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 192;
+            const c2 = canvas.getContext('2d');
+            c2.fillStyle = '#0f1720';
+            c2.fillRect(0, 0, 512, 192);
+            c2.strokeStyle = '#6fd3ff';
+            c2.lineWidth = 10;
+            c2.strokeRect(10, 10, 492, 172);
+            
+            c2.fillStyle = '#eef7ff';
+            c2.textAlign = 'center';
+            c2.textBaseline = 'middle';
+            let f1 = 56;
+            c2.font = 'bold ' + f1 + 'px Arial';
+            while (c2.measureText(monumentName).width > 470 && f1 > 20) {
+                f1 -= 2;
+                c2.font = 'bold ' + f1 + 'px Arial';
+            }
+            c2.fillText(monumentName, 256, 78);
+            
+            let f2 = 34;
+            c2.font = 'bold ' + f2 + 'px Arial';
+            while (c2.measureText(aiModel).width > 470 && f2 > 15) {
+                f2 -= 2;
+                c2.font = 'bold ' + f2 + 'px Arial';
+            }
+            c2.fillStyle = '#6fd3ff';
+            c2.fillText(aiModel, 256, 132);
+
+            const signMat = new ctx.THREE.MeshBasicMaterial({ map: new ctx.THREE.CanvasTexture(canvas) });
+            const matDark = new ctx.THREE.MeshLambertMaterial({ color: 0x222222 });
+            let pX = ctx.centerX - 10; // moved left to not collide with corner perfectly
+            let pZ = ctx.centerZ + 12;
+            ctx.createVoxel(pX - 2.2, 1.8, pZ, 0.22, 2.8, 0.22, matDark);
+            ctx.createVoxel(pX + 2.2, 1.8, pZ, 0.22, 2.8, 0.22, matDark);
+            let fundo = ctx.createVoxel(pX, 3.5, pZ, 5.2, 1.8, 0.22, matDark);
+            ctx.createVoxel(pX, 3.5, pZ + 0.12, 5.2, 1.8, 0.05, signMat);
+            ctx.collidables.push(new ctx.THREE.Box3().setFromObject(fundo));
+        }
+
         const THREE = ctx.THREE;
         const cx = ctx.centerX;
         const cz = ctx.centerZ;
@@ -17,29 +61,29 @@
         // =================================================================
         //  PALETA DE MATERIAIS — tons reais do mármore Makrana
         // =================================================================
-        const marble        = new THREE.MeshLambertMaterial({ color: 0xf5efe0 }); // mármore branco quente
-        const marbleWarm    = new THREE.MeshLambertMaterial({ color: 0xe8dec8 }); // mármore envelhecido
-        const marbleShadow  = new THREE.MeshLambertMaterial({ color: 0xd8cdb4 }); // sombra/base
-        const marbleBase    = new THREE.MeshLambertMaterial({ color: 0xc4b89a }); // pedestal inferior
-        const gold          = new THREE.MeshLambertMaterial({ color: 0xffd700 }); // ouro — kalasha
-        const goldBright    = new THREE.MeshBasicMaterial(  { color: 0xffee66 }); // ouro brilhante (emissivo)
-        const goldDark      = new THREE.MeshLambertMaterial({ color: 0xb8860b }); // detalhe em ouro
-        const sandstone     = new THREE.MeshLambertMaterial({ color: 0xa8602a }); // arenito vermelho (contraste)
-        const archShadow    = new THREE.MeshLambertMaterial({ color: 0x1c1410 }); // sombra interna dos iwans
-        const pietraBlue    = new THREE.MeshLambertMaterial({ color: 0x1e3a8a }); // lápis-lazúli incrustado
-        const pietraGreen   = new THREE.MeshLambertMaterial({ color: 0x2d6a4f }); // jade incrustado
-        const pietraRed     = new THREE.MeshLambertMaterial({ color: 0x8b1a1a }); // cornalina incrustada
-        const water         = new THREE.MeshLambertMaterial({ color: 0x4a90d9, transparent: true, opacity: 0.75 });
-        const waterDeep     = new THREE.MeshLambertMaterial({ color: 0x1e3a5f });
-        const cypress       = new THREE.MeshLambertMaterial({ color: 0x2d5a2d }); // ciprestes do jardim
-        const cypressDark   = new THREE.MeshLambertMaterial({ color: 0x1f3f1f });
-        const trunk         = new THREE.MeshLambertMaterial({ color: 0x4a2f1a });
-        const grass         = new THREE.MeshLambertMaterial({ color: 0x3a6b2a });
-        const pathStone     = new THREE.MeshLambertMaterial({ color: 0xc8ad7f });
-        const lanternGlow   = new THREE.MeshBasicMaterial(  { color: 0xffcc55 });
-        const moonlight     = new THREE.MeshBasicMaterial(  { color: 0xfff5c2 });
-        const signDark      = new THREE.MeshLambertMaterial({ color: 0x2a1a0a });
-        const signGold      = new THREE.MeshBasicMaterial(  { color: 0xffe066 });
+        const marble = new THREE.MeshLambertMaterial({ color: 0xf5efe0 }); // mármore branco quente
+        const marbleWarm = new THREE.MeshLambertMaterial({ color: 0xe8dec8 }); // mármore envelhecido
+        const marbleShadow = new THREE.MeshLambertMaterial({ color: 0xd8cdb4 }); // sombra/base
+        const marbleBase = new THREE.MeshLambertMaterial({ color: 0xc4b89a }); // pedestal inferior
+        const gold = new THREE.MeshLambertMaterial({ color: 0xffd700 }); // ouro — kalasha
+        const goldBright = new THREE.MeshBasicMaterial({ color: 0xffee66 }); // ouro brilhante (emissivo)
+        const goldDark = new THREE.MeshLambertMaterial({ color: 0xb8860b }); // detalhe em ouro
+        const sandstone = new THREE.MeshLambertMaterial({ color: 0xa8602a }); // arenito vermelho (contraste)
+        const archShadow = new THREE.MeshLambertMaterial({ color: 0x1c1410 }); // sombra interna dos iwans
+        const pietraBlue = new THREE.MeshLambertMaterial({ color: 0x1e3a8a }); // lápis-lazúli incrustado
+        const pietraGreen = new THREE.MeshLambertMaterial({ color: 0x2d6a4f }); // jade incrustado
+        const pietraRed = new THREE.MeshLambertMaterial({ color: 0x8b1a1a }); // cornalina incrustada
+        const water = new THREE.MeshLambertMaterial({ color: 0x4a90d9, transparent: true, opacity: 0.75 });
+        const waterDeep = new THREE.MeshLambertMaterial({ color: 0x1e3a5f });
+        const cypress = new THREE.MeshLambertMaterial({ color: 0x2d5a2d }); // ciprestes do jardim
+        const cypressDark = new THREE.MeshLambertMaterial({ color: 0x1f3f1f });
+        const trunk = new THREE.MeshLambertMaterial({ color: 0x4a2f1a });
+        const grass = new THREE.MeshLambertMaterial({ color: 0x3a6b2a });
+        const pathStone = new THREE.MeshLambertMaterial({ color: 0xc8ad7f });
+        const lanternGlow = new THREE.MeshBasicMaterial({ color: 0xffcc55 });
+        const moonlight = new THREE.MeshBasicMaterial({ color: 0xfff5c2 });
+        const signDark = new THREE.MeshLambertMaterial({ color: 0x2a1a0a });
+        const signGold = new THREE.MeshBasicMaterial({ color: 0xffe066 });
 
         // =================================================================
         //  HELPERS DE CONSTRUÇÃO
@@ -59,8 +103,8 @@
             const r = Math.ceil(radius);
             for (let dx = -r; dx <= r; dx++) {
                 for (let dz = -r; dz <= r; dz++) {
-                    const d2 = dx*dx + dz*dz;
-                    if (d2 <= radius*radius) {
+                    const d2 = dx * dx + dz * dz;
+                    if (d2 <= radius * radius) {
                         vox(cX + dx, y, cZ + dz, 1.01, height, 1.01, mat, collide);
                     }
                 }
@@ -72,8 +116,8 @@
             const r = Math.ceil(rOut);
             for (let dx = -r; dx <= r; dx++) {
                 for (let dz = -r; dz <= r; dz++) {
-                    const d2 = dx*dx + dz*dz;
-                    if (d2 <= rOut*rOut && d2 > rIn*rIn) {
+                    const d2 = dx * dx + dz * dz;
+                    if (d2 <= rOut * rOut && d2 > rIn * rIn) {
                         vox(cX + dx, y, cZ + dz, 1.01, height, 1.01, mat, collide);
                     }
                 }
@@ -88,20 +132,20 @@
             const archCenterY = yBase + height - archRadius;
             // Pinta um retângulo escuro onde seria a abertura, com cantos arredondados no topo
             for (let wy = 0; wy < height; wy++) {
-                for (let wx = -Math.floor(width/2); wx <= Math.floor(width/2); wx++) {
+                for (let wx = -Math.floor(width / 2); wx <= Math.floor(width / 2); wx++) {
                     let draw = true;
                     // Topo arredondado (arco)
                     const yFromArchCenter = (yBase + wy + 0.5) - archCenterY;
                     if (yFromArchCenter > 0) {
-                        const rr = wx*wx + yFromArchCenter*yFromArchCenter;
-                        if (rr > archRadius*archRadius) draw = false;
+                        const rr = wx * wx + yFromArchCenter * yFromArchCenter;
+                        if (rr > archRadius * archRadius) draw = false;
                     }
                     if (!draw) continue;
                     let px = cX, pz = cZ;
                     if (facing === 'south') { px = cX + wx; pz = cZ - depth; }
                     if (facing === 'north') { px = cX + wx; pz = cZ + depth; }
-                    if (facing === 'east')  { px = cX + depth; pz = cZ + wx; }
-                    if (facing === 'west')  { px = cX - depth; pz = cZ + wx; }
+                    if (facing === 'east') { px = cX + depth; pz = cZ + wx; }
+                    if (facing === 'west') { px = cX - depth; pz = cZ + wx; }
                     vox(px, yBase + wy + 0.5, pz, 1.02, 1.02, 1.02, darkMat, false);
                 }
             }
@@ -130,7 +174,7 @@
         // Reflexo suave de ouro na água (efeito luz)
         vox(0, 0.47, -13.5, 1, 0.02, 2, goldBright, false);
         vox(-2.5, 0.47, -13.5, 0.5, 0.02, 1.5, lanternGlow, false);
-        vox( 2.5, 0.47, -13.5, 0.5, 0.02, 1.5, lanternGlow, false);
+        vox(2.5, 0.47, -13.5, 0.5, 0.02, 1.5, lanternGlow, false);
 
         // Piscina traseira (simétrica, no +Z)
         vox(0, 0.3, 13.5, 10, 0.6, 3, marbleShadow, false);
@@ -146,13 +190,13 @@
         vox(0, 1.8, 0, 22, 1.2, 22, marbleShadow);
         // Borda decorativa superior (friso)
         vox(0, 2.5, -10.95, 22, 0.3, 0.3, marble, false);
-        vox(0, 2.5,  10.95, 22, 0.3, 0.3, marble, false);
+        vox(0, 2.5, 10.95, 22, 0.3, 0.3, marble, false);
         vox(-10.95, 2.5, 0, 0.3, 0.3, 22, marble, false);
-        vox( 10.95, 2.5, 0, 0.3, 0.3, 22, marble, false);
+        vox(10.95, 2.5, 0, 0.3, 0.3, 22, marble, false);
 
         // Pequenos pináculos decorativos nos 4 cantos da plataforma
-        const cornerPinnacles = [[-10.5,-10.5],[10.5,-10.5],[-10.5,10.5],[10.5,10.5]];
-        cornerPinnacles.forEach(([px,pz]) => {
+        const cornerPinnacles = [[-10.5, -10.5], [10.5, -10.5], [-10.5, 10.5], [10.5, 10.5]];
+        cornerPinnacles.forEach(([px, pz]) => {
             vox(px, 2.6, pz, 0.7, 0.3, 0.7, marble, false);
             vox(px, 2.9, pz, 0.4, 0.4, 0.4, gold, false);
         });
@@ -163,7 +207,7 @@
         for (let i = 0; i < 3; i++) {
             const y = 0.3 + i * 0.4;
             const zOffset = -11.5 - (2 - i) * 0.8;
-            vox(0, y, zOffset, 7 - i*0.3, 0.4, 0.8, marbleShadow);
+            vox(0, y, zOffset, 7 - i * 0.3, 0.4, 0.8, marbleShadow);
         }
 
         // =================================================================
@@ -172,9 +216,9 @@
         vox(0, 3.4, 0, 17, 0.8, 17, marble);
         // Friso dourado superior
         vox(0, 3.9, -8.45, 17, 0.1, 0.15, gold, false);
-        vox(0, 3.9,  8.45, 17, 0.1, 0.15, gold, false);
+        vox(0, 3.9, 8.45, 17, 0.1, 0.15, gold, false);
         vox(-8.45, 3.9, 0, 0.15, 0.1, 17, gold, false);
-        vox( 8.45, 3.9, 0, 0.15, 0.1, 17, gold, false);
+        vox(8.45, 3.9, 0, 0.15, 0.1, 17, gold, false);
 
         // =================================================================
         //  6. MAUSOLÉU PRINCIPAL — o corpo quadrado octogonal
@@ -185,8 +229,8 @@
 
         // Chanfrando os cantos (octogonalidade parcial) — remove cantos com sombra
         // Simulamos com blocos de canto ligeiramente recuados em tom mais claro
-        const cornerBevels = [[-6,-6],[6,-6],[-6,6],[6,6]];
-        cornerBevels.forEach(([bx,bz]) => {
+        const cornerBevels = [[-6, -6], [6, -6], [-6, 6], [6, 6]];
+        cornerBevels.forEach(([bx, bz]) => {
             // Pilastra de canto decorativa
             vox(bx, 9, bz, 2, 10, 2, marbleWarm, false);
             // Detalhe ornamental em cada canto (incrustação pietra dura)
@@ -203,18 +247,18 @@
         function pishtaq(facing) {
             let mx = 0, mz = 0, w = 1, d = 1;
             if (facing === 'south') { mz = -7.05; w = 7; d = 0.15; }
-            if (facing === 'north') { mz =  7.05; w = 7; d = 0.15; }
-            if (facing === 'east')  { mx =  7.05; w = 0.15; d = 7; }
-            if (facing === 'west')  { mx = -7.05; w = 0.15; d = 7; }
+            if (facing === 'north') { mz = 7.05; w = 7; d = 0.15; }
+            if (facing === 'east') { mx = 7.05; w = 0.15; d = 7; }
+            if (facing === 'west') { mx = -7.05; w = 0.15; d = 7; }
             // Moldura vertical externa (alta)
-            vox(mx, 10, mz, facing==='south'||facing==='north'?7:0.2, 10.5, facing==='east'||facing==='west'?7:0.2, marbleWarm, false);
+            vox(mx, 10, mz, facing === 'south' || facing === 'north' ? 7 : 0.2, 10.5, facing === 'east' || facing === 'west' ? 7 : 0.2, marbleWarm, false);
             // Topo em cornija
-            vox(mx, 15.3, mz, facing==='south'||facing==='north'?7.4:0.3, 0.4, facing==='east'||facing==='west'?7.4:0.3, gold, false);
+            vox(mx, 15.3, mz, facing === 'south' || facing === 'north' ? 7.4 : 0.3, 0.4, facing === 'east' || facing === 'west' ? 7.4 : 0.3, gold, false);
             // Friso dourado interno do pishtaq
-            if (facing==='south'||facing==='north') {
-                vox(mx, 15, mz + (facing==='south'?0.05:-0.05), 6.5, 0.15, 0.05, gold, false);
+            if (facing === 'south' || facing === 'north') {
+                vox(mx, 15, mz + (facing === 'south' ? 0.05 : -0.05), 6.5, 0.15, 0.05, gold, false);
             } else {
-                vox(mx + (facing==='east'?-0.05:0.05), 15, mz, 0.05, 0.15, 6.5, gold, false);
+                vox(mx + (facing === 'east' ? -0.05 : 0.05), 15, mz, 0.05, 0.15, 6.5, gold, false);
             }
         }
         pishtaq('south'); pishtaq('north'); pishtaq('east'); pishtaq('west');
@@ -223,17 +267,17 @@
         // Frente (sul, -z)
         iwanArch(0, 5, -7, 4, 7, 6.95, 'south', marble, archShadow);
         // Trás (norte, +z)
-        iwanArch(0, 5,  7, 4, 7, 6.95, 'north', marble, archShadow);
+        iwanArch(0, 5, 7, 4, 7, 6.95, 'north', marble, archShadow);
         // Leste (+x)
-        iwanArch(0, 5,  0, 4, 7, 6.95, 'east',  marble, archShadow);
+        iwanArch(0, 5, 0, 4, 7, 6.95, 'east', marble, archShadow);
         // Oeste (-x)
-        iwanArch(0, 5,  0, 4, 7, 6.95, 'west',  marble, archShadow);
+        iwanArch(0, 5, 0, 4, 7, 6.95, 'west', marble, archShadow);
 
         // Luz quente vindo de dentro dos iwans (glow dourado)
         vox(0, 7, -6.85, 2, 3, 0.1, lanternGlow, false);
-        vox(0, 7,  6.85, 2, 3, 0.1, lanternGlow, false);
+        vox(0, 7, 6.85, 2, 3, 0.1, lanternGlow, false);
         vox(-6.85, 7, 0, 0.1, 3, 2, lanternGlow, false);
-        vox( 6.85, 7, 0, 0.1, 3, 2, lanternGlow, false);
+        vox(6.85, 7, 0, 0.1, 3, 2, lanternGlow, false);
 
         // Detalhe caligráfico / incrustação ao redor dos iwans (pietra dura)
         // Faixas decorativas ao redor das aberturas
@@ -241,14 +285,14 @@
             if (Math.abs(i) % 2 === 0) {
                 // Sul
                 vox(i, 12.5, -7.08, 0.6, 0.3, 0.05, pietraRed, false);
-                vox(i, 12.5,  7.08, 0.6, 0.3, 0.05, pietraRed, false);
+                vox(i, 12.5, 7.08, 0.6, 0.3, 0.05, pietraRed, false);
                 // Leste/Oeste
-                vox( 7.08, 12.5, i, 0.05, 0.3, 0.6, pietraRed, false);
+                vox(7.08, 12.5, i, 0.05, 0.3, 0.6, pietraRed, false);
                 vox(-7.08, 12.5, i, 0.05, 0.3, 0.6, pietraRed, false);
             } else {
                 vox(i, 12.5, -7.08, 0.5, 0.3, 0.05, pietraGreen, false);
-                vox(i, 12.5,  7.08, 0.5, 0.3, 0.05, pietraGreen, false);
-                vox( 7.08, 12.5, i, 0.05, 0.3, 0.5, pietraGreen, false);
+                vox(i, 12.5, 7.08, 0.5, 0.3, 0.05, pietraGreen, false);
+                vox(7.08, 12.5, i, 0.05, 0.3, 0.5, pietraGreen, false);
                 vox(-7.08, 12.5, i, 0.05, 0.3, 0.5, pietraGreen, false);
             }
         }
@@ -261,10 +305,10 @@
         vox(0, 14.75, 0, 14.8, 0.3, 14.8, marble, false);
         // Parapeito decorativo com "ameias" estilizadas
         for (let i = -7; i <= 7; i += 2) {
-            vox(i,       15.1, -7.4, 0.4, 0.4, 0.3, marble, false);
-            vox(i,       15.1,  7.4, 0.4, 0.4, 0.3, marble, false);
-            vox(-7.4,    15.1,  i,  0.3, 0.4, 0.4, marble, false);
-            vox( 7.4,    15.1,  i,  0.3, 0.4, 0.4, marble, false);
+            vox(i, 15.1, -7.4, 0.4, 0.4, 0.3, marble, false);
+            vox(i, 15.1, 7.4, 0.4, 0.4, 0.3, marble, false);
+            vox(-7.4, 15.1, i, 0.3, 0.4, 0.4, marble, false);
+            vox(7.4, 15.1, i, 0.3, 0.4, 0.4, marble, false);
         }
 
         // =================================================================
@@ -274,10 +318,10 @@
             // Base/plataforma
             vox(px, 15.3, pz, 2.5, 0.3, 2.5, marble, false);
             // 4 colunas
-            vox(px-0.9, 16.3, pz-0.9, 0.3, 1.8, 0.3, marble, false);
-            vox(px+0.9, 16.3, pz-0.9, 0.3, 1.8, 0.3, marble, false);
-            vox(px-0.9, 16.3, pz+0.9, 0.3, 1.8, 0.3, marble, false);
-            vox(px+0.9, 16.3, pz+0.9, 0.3, 1.8, 0.3, marble, false);
+            vox(px - 0.9, 16.3, pz - 0.9, 0.3, 1.8, 0.3, marble, false);
+            vox(px + 0.9, 16.3, pz - 0.9, 0.3, 1.8, 0.3, marble, false);
+            vox(px - 0.9, 16.3, pz + 0.9, 0.3, 1.8, 0.3, marble, false);
+            vox(px + 0.9, 16.3, pz + 0.9, 0.3, 1.8, 0.3, marble, false);
             // Topo plano do dossel
             vox(px, 17.3, pz, 2.2, 0.2, 2.2, marbleWarm, false);
             // Cúpula pequena (discos decrescentes)
@@ -294,9 +338,9 @@
             vox(px, 19.5, pz, 0.1, 0.3, 0.1, gold, false);
         }
         chattri(-5, -5);
-        chattri( 5, -5);
-        chattri(-5,  5);
-        chattri( 5,  5);
+        chattri(5, -5);
+        chattri(-5, 5);
+        chattri(5, 5);
 
         // =================================================================
         //  10. O TAMBOR (DRUM) DA CÚPULA PRINCIPAL
@@ -322,22 +366,22 @@
         // =================================================================
         // Perfil bulboso (raio cresce, atinge máximo, decresce):
         const domeLayers = [
-            { y: 17.5,  r: 4.0 },
-            { y: 17.9,  r: 4.3 },
-            { y: 18.3,  r: 4.5 },
-            { y: 18.7,  r: 4.6 },  // ligeiro bulbo inferior
-            { y: 19.1,  r: 4.6 },  // parte mais larga
-            { y: 19.5,  r: 4.5 },
-            { y: 19.9,  r: 4.3 },
-            { y: 20.3,  r: 4.0 },
-            { y: 20.7,  r: 3.7 },
-            { y: 21.1,  r: 3.3 },
-            { y: 21.5,  r: 2.9 },
-            { y: 21.9,  r: 2.4 },
-            { y: 22.3,  r: 1.9 },
-            { y: 22.7,  r: 1.4 },
-            { y: 23.1,  r: 1.0 },
-            { y: 23.5,  r: 0.6 },
+            { y: 17.5, r: 4.0 },
+            { y: 17.9, r: 4.3 },
+            { y: 18.3, r: 4.5 },
+            { y: 18.7, r: 4.6 },  // ligeiro bulbo inferior
+            { y: 19.1, r: 4.6 },  // parte mais larga
+            { y: 19.5, r: 4.5 },
+            { y: 19.9, r: 4.3 },
+            { y: 20.3, r: 4.0 },
+            { y: 20.7, r: 3.7 },
+            { y: 21.1, r: 3.3 },
+            { y: 21.5, r: 2.9 },
+            { y: 21.9, r: 2.4 },
+            { y: 22.3, r: 1.9 },
+            { y: 22.7, r: 1.4 },
+            { y: 23.1, r: 1.0 },
+            { y: 23.5, r: 0.6 },
         ];
         domeLayers.forEach(l => disc(0, l.y, 0, l.r, 0.42, marble, false));
 
@@ -360,7 +404,7 @@
         // Lua crescente (símbolo islâmico) — aproximação voxel
         vox(0, 28.5, 0, 0.8, 0.15, 0.15, gold, false);
         vox(-0.3, 28.7, 0, 0.15, 0.3, 0.15, gold, false);
-        vox( 0.3, 28.7, 0, 0.15, 0.3, 0.15, gold, false);
+        vox(0.3, 28.7, 0, 0.15, 0.3, 0.15, gold, false);
         // Pico luminoso
         vox(0, 29.0, 0, 0.25, 0.25, 0.25, goldBright, false);
 
@@ -384,7 +428,7 @@
                 const ang = a * Math.PI / 180;
                 const dx = 1.5 * Math.cos(ang);
                 const dz = 1.5 * Math.sin(ang);
-                vox(mx+dx, 9.85, mz+dz, 0.15, 0.4, 0.15, marble, false);
+                vox(mx + dx, 9.85, mz + dz, 0.15, 0.4, 0.15, marble, false);
             }
 
             // Seção 2 (y=9.6 → y=15)
@@ -397,7 +441,7 @@
                 const ang = a * Math.PI / 180;
                 const dx = 1.2 * Math.cos(ang);
                 const dz = 1.2 * Math.sin(ang);
-                vox(mx+dx, 15.85, mz+dz, 0.13, 0.35, 0.13, marble, false);
+                vox(mx + dx, 15.85, mz + dz, 0.13, 0.35, 0.13, marble, false);
             }
 
             // Seção 3 (y=15.6 → y=20)
@@ -410,15 +454,15 @@
                 const ang = a * Math.PI / 180;
                 const dx = 1.0 * Math.cos(ang);
                 const dz = 1.0 * Math.sin(ang);
-                vox(mx+dx, 21.05, mz+dz, 0.1, 0.3, 0.1, marble, false);
+                vox(mx + dx, 21.05, mz + dz, 0.1, 0.3, 0.1, marble, false);
             }
 
             // Chattri do minarete (cúpula pequena no topo)
             // Pilares
-            vox(mx-0.6, 21.6, mz-0.6, 0.2, 1.4, 0.2, marble, false);
-            vox(mx+0.6, 21.6, mz-0.6, 0.2, 1.4, 0.2, marble, false);
-            vox(mx-0.6, 21.6, mz+0.6, 0.2, 1.4, 0.2, marble, false);
-            vox(mx+0.6, 21.6, mz+0.6, 0.2, 1.4, 0.2, marble, false);
+            vox(mx - 0.6, 21.6, mz - 0.6, 0.2, 1.4, 0.2, marble, false);
+            vox(mx + 0.6, 21.6, mz - 0.6, 0.2, 1.4, 0.2, marble, false);
+            vox(mx - 0.6, 21.6, mz + 0.6, 0.2, 1.4, 0.2, marble, false);
+            vox(mx + 0.6, 21.6, mz + 0.6, 0.2, 1.4, 0.2, marble, false);
             // Topo
             disc(mx, 22.4, mz, 1.0, 0.2, marbleWarm, false);
             // Cupolazinha
@@ -439,9 +483,9 @@
         }
 
         minaret(-9.5, -9.5);
-        minaret( 9.5, -9.5);
-        minaret(-9.5,  9.5);
-        minaret( 9.5,  9.5);
+        minaret(9.5, -9.5);
+        minaret(-9.5, 9.5);
+        minaret(9.5, 9.5);
 
         // =================================================================
         //  14. JARDIM CHARBAGH — CIPRESTES ACROSS O JARDIM
@@ -463,34 +507,34 @@
 
         // Ciprestes flanqueando a piscina sul
         cypress_tree(-5, -13.8, 6);
-        cypress_tree( 5, -13.8, 6);
+        cypress_tree(5, -13.8, 6);
         cypress_tree(-6.5, -12.5, 5);
-        cypress_tree( 6.5, -12.5, 5);
+        cypress_tree(6.5, -12.5, 5);
         // Ciprestes flanqueando a piscina norte
-        cypress_tree(-5,  13.8, 6);
-        cypress_tree( 5,  13.8, 6);
-        cypress_tree(-6.5,  12.5, 5);
-        cypress_tree( 6.5,  12.5, 5);
+        cypress_tree(-5, 13.8, 6);
+        cypress_tree(5, 13.8, 6);
+        cypress_tree(-6.5, 12.5, 5);
+        cypress_tree(6.5, 12.5, 5);
         // Ciprestes nas laterais leste/oeste
         cypress_tree(-13.5, -5, 6);
-        cypress_tree(-13.5,  5, 6);
-        cypress_tree( 13.5, -5, 6);
-        cypress_tree( 13.5,  5, 6);
+        cypress_tree(-13.5, 5, 6);
+        cypress_tree(13.5, -5, 6);
+        cypress_tree(13.5, 5, 6);
         cypress_tree(-12.5, 0, 5);
-        cypress_tree( 12.5, 0, 5);
+        cypress_tree(12.5, 0, 5);
 
         // Canteiros floridos na base dos ciprestes (pequenos detalhes)
         function flowerbed(px, pz) {
             vox(px, 0.15, pz, 1.5, 0.05, 1.5, pietraRed, false);
-            vox(px-0.3, 0.25, pz-0.3, 0.15, 0.15, 0.15, gold, false);
-            vox(px+0.3, 0.25, pz+0.3, 0.15, 0.15, 0.15, pietraBlue, false);
-            vox(px+0.3, 0.25, pz-0.3, 0.15, 0.15, 0.15, marble, false);
-            vox(px-0.3, 0.25, pz+0.3, 0.15, 0.15, 0.15, pietraGreen, false);
+            vox(px - 0.3, 0.25, pz - 0.3, 0.15, 0.15, 0.15, gold, false);
+            vox(px + 0.3, 0.25, pz + 0.3, 0.15, 0.15, 0.15, pietraBlue, false);
+            vox(px + 0.3, 0.25, pz - 0.3, 0.15, 0.15, 0.15, marble, false);
+            vox(px - 0.3, 0.25, pz + 0.3, 0.15, 0.15, 0.15, pietraGreen, false);
         }
         flowerbed(-7, -9);
-        flowerbed( 7, -9);
-        flowerbed(-7,  9);
-        flowerbed( 7,  9);
+        flowerbed(7, -9);
+        flowerbed(-7, 9);
+        flowerbed(7, 9);
 
         // =================================================================
         //  15. LANTERNAS NO JARDIM (luz noturna romântica)
@@ -503,13 +547,13 @@
             vox(px, 1.65, pz, 0.15, 0.25, 0.15, gold, false);
         }
         lantern(-8, -13);
-        lantern( 8, -13);
-        lantern(-8,  13);
-        lantern( 8,  13);
+        lantern(8, -13);
+        lantern(-8, 13);
+        lantern(8, 13);
         lantern(-13, -8);
-        lantern(-13,  8);
-        lantern( 13, -8);
-        lantern( 13,  8);
+        lantern(-13, 8);
+        lantern(13, -8);
+        lantern(13, 8);
 
         // =================================================================
         //  16. LUZES DECORATIVAS NO MAUSOLÉU (iluminação dramática)
@@ -524,9 +568,9 @@
         // Luzes sob a cornija
         for (let i = -6; i <= 6; i += 2) {
             vox(i, 14.1, -7.3, 0.3, 0.1, 0.05, lanternGlow, false);
-            vox(i, 14.1,  7.3, 0.3, 0.1, 0.05, lanternGlow, false);
+            vox(i, 14.1, 7.3, 0.3, 0.1, 0.05, lanternGlow, false);
             vox(-7.3, 14.1, i, 0.05, 0.1, 0.3, lanternGlow, false);
-            vox( 7.3, 14.1, i, 0.05, 0.1, 0.3, lanternGlow, false);
+            vox(7.3, 14.1, i, 0.05, 0.1, 0.3, lanternGlow, false);
         }
 
         // =================================================================
@@ -542,23 +586,23 @@
         vox(0, 2.3, -9.7, 7.2, 0.1, 0.08, gold, false);
         vox(0, 0.75, -9.7, 7.2, 0.1, 0.08, gold, false);
         vox(-3.6, 1.5, -9.7, 0.1, 1.5, 0.08, gold, false);
-        vox( 3.6, 1.5, -9.7, 0.1, 1.5, 0.08, gold, false);
+        vox(3.6, 1.5, -9.7, 0.1, 1.5, 0.08, gold, false);
 
         // ---- SISTEMA DE FONTE VOXEL (5x7 pixel) ----
         const FONT = {
-            'C': ["01110","10001","10000","10000","10000","10001","01110"],
-            'L': ["10000","10000","10000","10000","10000","10000","11111"],
-            'A': ["01110","10001","10001","11111","10001","10001","10001"],
-            'U': ["10001","10001","10001","10001","10001","10001","01110"],
-            'D': ["11110","10001","10001","10001","10001","10001","11110"],
-            'E': ["11111","10000","10000","11110","10000","10000","11111"],
-            'O': ["01110","10001","10001","10001","10001","10001","01110"],
-            'P': ["11110","10001","10001","11110","10000","10000","10000"],
-            'S': ["01111","10000","10000","01110","00001","00001","11110"],
-            '4': ["10001","10001","10001","11111","00001","00001","00001"],
-            '.': ["00000","00000","00000","00000","00000","00000","00100"],
-            '7': ["11111","00001","00001","00010","00100","00100","00100"],
-            ' ': ["00000","00000","00000","00000","00000","00000","00000"],
+            'C': ["01110", "10001", "10000", "10000", "10000", "10001", "01110"],
+            'L': ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
+            'A': ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
+            'U': ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
+            'D': ["11110", "10001", "10001", "10001", "10001", "10001", "11110"],
+            'E': ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
+            'O': ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
+            'P': ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
+            'S': ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
+            '4': ["10001", "10001", "10001", "11111", "00001", "00001", "00001"],
+            '.': ["00000", "00000", "00000", "00000", "00000", "00000", "00100"],
+            '7': ["11111", "00001", "00001", "00010", "00100", "00100", "00100"],
+            ' ': ["00000", "00000", "00000", "00000", "00000", "00000", "00000"],
         };
 
         function drawText(text, originX, originY, z, pixelSize, mat) {
@@ -570,9 +614,9 @@
                 for (let row = 0; row < charH; row++) {
                     for (let col = 0; col < charW; col++) {
                         if (glyph[row][col] === '1') {
-                            const px = startX + (ci * (charW + 1) + col) * pixelSize + pixelSize/2;
-                            const py = originY + (charH - 1 - row) * pixelSize + pixelSize/2;
-                            vox(px, py, z, pixelSize*1.02, pixelSize*1.02, pixelSize*1.02, mat, false);
+                            const px = startX + (ci * (charW + 1) + col) * pixelSize + pixelSize / 2;
+                            const py = originY + (charH - 1 - row) * pixelSize + pixelSize / 2;
+                            vox(px, py, z, pixelSize * 1.02, pixelSize * 1.02, pixelSize * 1.02, mat, false);
                         }
                     }
                 }
@@ -586,9 +630,9 @@
 
         // Pequenas gemas decorativas na placa (cantos)
         vox(-3.2, 2.25, -9.65, 0.15, 0.15, 0.08, pietraRed, false);
-        vox( 3.2, 2.25, -9.65, 0.15, 0.15, 0.08, pietraRed, false);
+        vox(3.2, 2.25, -9.65, 0.15, 0.15, 0.08, pietraRed, false);
         vox(-3.2, 0.85, -9.65, 0.15, 0.15, 0.08, pietraBlue, false);
-        vox( 3.2, 0.85, -9.65, 0.15, 0.15, 0.08, pietraBlue, false);
+        vox(3.2, 0.85, -9.65, 0.15, 0.15, 0.08, pietraBlue, false);
 
         // Luminária sobre a placa
         vox(0, 2.65, -9.8, 0.4, 0.2, 0.3, marbleWarm, false);
@@ -600,9 +644,9 @@
         // =================================================================
         vox(-6, 26, 8, 0.4, 0.1, 0.15, marble, false);
         vox(-5.7, 26, 8, 0.4, 0.1, 0.15, marble, false);
-        vox( 6, 27, -7, 0.4, 0.1, 0.15, marble, false);
-        vox( 6.3, 27, -7, 0.4, 0.1, 0.15, marble, false);
-        vox( 8, 24, 10, 0.3, 0.1, 0.1, marble, false);
+        vox(6, 27, -7, 0.4, 0.1, 0.15, marble, false);
+        vox(6.3, 27, -7, 0.4, 0.1, 0.15, marble, false);
+        vox(8, 24, 10, 0.3, 0.1, 0.1, marble, false);
 
         // =================================================================
         //  19. REGISTRAR O MAUSOLÉU NO MINIMAPA
@@ -624,5 +668,6 @@
         //  FIM — "Aqui jaz, em voxels, a memória eterna do amor."
         //  Construído por Claude Opus 4.7 · Anthropic · 2026
         // =================================================================
+        renderStandardSign('TAJ MAHAL', 'Claude Opus 4.7');
     };
 })();

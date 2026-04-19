@@ -67,16 +67,34 @@ export function spawnCar() {
 
 // --- Helicóptero ---
 export const heli = new THREE.Group();
-heli.position.set(0, 12, -40);
+heli.position.set(0, 1.5, -40); 
 
-const heliH = createVoxel(0, 6, -40, 6, 12, 6, matRoad);
-collidables.push(new THREE.Box3().setFromObject(heliH));
+// Base do heliporto (octógono elevado) 
+const baseGeo = new THREE.CylinderGeometry(8, 8, 1.5, 8);
+const baseMesh = new THREE.Mesh(baseGeo, matRoad);
+baseMesh.position.set(0, 0.75, -40);
+// Rotaciona para que uma das faces fique reta com a escada
+baseMesh.rotation.y = Math.PI / 8;
+scene.add(baseMesh);
+collidables.push(new THREE.Box3().setFromObject(baseMesh));
 
-// Escadas para o heliporto
-for (let i = 0; i < 12; i++) {
-    const stair = createVoxel(0, i + 0.5, -34 - i * 0.3, 2, 1, 1, matRoad);
-    collidables.push(new THREE.Box3().setFromObject(stair));
-}
+// Escadinha baixa
+const stairH = createVoxel(0, 0.375, -32, 3, 0.75, 1.5, matRoad);
+collidables.push(new THREE.Box3().setFromObject(stairH));
+
+// Círculo amarelo pintado no chão
+const ringGeo = new THREE.RingGeometry(4.5, 5.2, 32);
+const ringMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide });
+const ring = new THREE.Mesh(ringGeo, ringMat);
+ring.rotation.x = -Math.PI / 2;
+ring.position.set(0, 1.51, -40);
+scene.add(ring);
+
+// Letra H maior e mais visível
+const matWhiteH = new THREE.MeshBasicMaterial({ color: 0xffffff });
+createVoxel(-2, 1.51, -40, 0.8, 0.05, 5.5, matWhiteH);
+createVoxel(2, 1.51, -40, 0.8, 0.05, 5.5, matWhiteH);
+createVoxel(0, 1.51, -40, 3.2, 0.05, 0.8, matWhiteH);
 
 const hBody = createVoxel(0, 1, 0, 2, 2, 4, new THREE.MeshLambertMaterial({ color: 0x222222 }));
 export const hRotor = createVoxel(0, 2.2, 0, 8, 0.1, 0.5, new THREE.MeshLambertMaterial({ color: 0xdddddd }));

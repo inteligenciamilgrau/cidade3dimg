@@ -3,6 +3,50 @@
     window.customBlocks = window.customBlocks || {};
     window.customBlocks['1_4'] = function(ctx) {
 
+        // === FUNÇÃO PADRÃO DE PLACA ===
+        function renderStandardSign(monumentName, aiModel) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 192;
+            const c2 = canvas.getContext('2d');
+            c2.fillStyle = '#0f1720';
+            c2.fillRect(0, 0, 512, 192);
+            c2.strokeStyle = '#6fd3ff';
+            c2.lineWidth = 10;
+            c2.strokeRect(10, 10, 492, 172);
+            
+            c2.fillStyle = '#eef7ff';
+            c2.textAlign = 'center';
+            c2.textBaseline = 'middle';
+            let f1 = 56;
+            c2.font = 'bold ' + f1 + 'px Arial';
+            while (c2.measureText(monumentName).width > 470 && f1 > 20) {
+                f1 -= 2;
+                c2.font = 'bold ' + f1 + 'px Arial';
+            }
+            c2.fillText(monumentName, 256, 78);
+            
+            let f2 = 34;
+            c2.font = 'bold ' + f2 + 'px Arial';
+            while (c2.measureText(aiModel).width > 470 && f2 > 15) {
+                f2 -= 2;
+                c2.font = 'bold ' + f2 + 'px Arial';
+            }
+            c2.fillStyle = '#6fd3ff';
+            c2.fillText(aiModel, 256, 132);
+
+            const signMat = new ctx.THREE.MeshBasicMaterial({ map: new ctx.THREE.CanvasTexture(canvas) });
+            const matDark = new ctx.THREE.MeshLambertMaterial({ color: 0x222222 });
+            let pX = ctx.centerX - 10; // moved left to not collide with corner perfectly
+            let pZ = ctx.centerZ + 12;
+            ctx.createVoxel(pX - 2.2, 1.8, pZ, 0.22, 2.8, 0.22, matDark);
+            ctx.createVoxel(pX + 2.2, 1.8, pZ, 0.22, 2.8, 0.22, matDark);
+            let fundo = ctx.createVoxel(pX, 3.5, pZ, 5.2, 1.8, 0.22, matDark);
+            ctx.createVoxel(pX, 3.5, pZ + 0.12, 5.2, 1.8, 0.05, signMat);
+            ctx.collidables.push(new ctx.THREE.Box3().setFromObject(fundo));
+        }
+
+
         // === MATERIAIS ===
         const glassMat = new ctx.THREE.MeshLambertMaterial({ color: 0x88ccff, transparent: true, opacity: 0.55 });
         const steelMat = new ctx.THREE.MeshLambertMaterial({ color: 0x2a2a35 });
@@ -94,56 +138,7 @@
             ));
         }
 
-        // === 🔖 PLAQUINHA "qwen 3.6 Plus" (LÓGICA VALIDADA v6.0) ===
-        let post = ctx.createVoxel(ctx.centerX, 4, ctx.centerZ + 16, 0.4, 5.5, 0.4, steelMat);
-        ctx.collidables.push(new ctx.THREE.Box3().setFromObject(post));
-
-        let signBoard = ctx.createVoxel(ctx.centerX, 7.5, ctx.centerZ + 16.3, 18, 5.5, 0.6, signMat);
-        ctx.collidables.push(new ctx.THREE.Box3().setFromObject(signBoard));
-        
-        ctx.createVoxel(ctx.centerX, 7.5, ctx.centerZ + 16.25, 18.8, 6.3, 0.15, neonMat);
-
-        // Texto em Voxel (Centralizado, Espaçado, Legível)
-        const tz = ctx.centerZ + 16.85; 
-        const ty = 7.5; 
-        const u = 0.28; 
-        const letterGap = 0.85;  
-        const wordGap = 2.2;
-
-        function px(x, y, z) { ctx.createVoxel(x, y, z, u, u, 0.45, textMat); }
-
-        const fonts = {
-            q: [[1,0],[2,0],[3,0],[0,1],[4,1],[0,2],[4,2],[0,3],[1,3],[2,3],[3,3],[3,4],[4,5]],
-            w: [[0,0],[4,0],[0,1],[4,1],[0,2],[2,2],[4,2],[0,3],[4,3],[0,4],[1,4],[2,4],[3,4],[4,4]],
-            e: [[0,0],[1,0],[2,0],[3,0],[0,1],[0,2],[1,2],[2,2],[0,3],[0,4],[1,4],[2,4],[3,4]],
-            n: [[0,0],[0,1],[0,2],[0,3],[0,4],[1,1],[2,2],[3,3],[4,0],[4,1],[4,2],[4,3],[4,4]],
-            3: [[1,0],[2,0],[3,0],[4,1],[1,2],[2,2],[3,2],[4,3],[1,4],[2,4],[3,4]],
-            6: [[2,0],[3,0],[0,1],[0,2],[0,3],[0,4],[1,4],[2,4],[3,4],[4,3],[4,2],[4,1],[1,2],[2,2]],
-            p: [[0,0],[0,1],[0,2],[0,3],[0,4],[1,0],[2,0],[3,0],[1,2],[2,2],[3,2],[4,1]],
-            l: [[0,0],[0,1],[0,2],[0,3],[0,4],[1,4],[2,4],[3,4]],
-            u: [[0,0],[0,1],[0,2],[0,3],[2,3],[2,4],[3,4],[4,0],[4,1],[4,2],[4,3],[1,4]],
-            s: [[1,0],[2,0],[3,0],[0,1],[0,2],[1,2],[2,2],[3,3],[3,4],[0,4],[1,4],[2,4]],
-            '.': [[0,0],[1,0],[0,1],[1,1]]
-        };
-
-        function draw(char, startX) {
-            const map = fonts[char];
-            if (!map) return 0;
-            let maxW = 0;
-            for (let p of map) {
-                let finalY = ty + (4 - p[1]) * u; // Inversão corrigida
-                px(startX + p[0]*u, finalY, tz);
-                if (p[0] > maxW) maxW = p[0];
-            }
-            return (maxW * u) + letterGap;
-        }
-
-        let cx = ctx.centerX - 6.5;
-        cx += draw('q', cx); cx += draw('w', cx); cx += draw('e', cx); cx += draw('n', cx);
-        cx += wordGap;
-        cx += draw('3', cx); cx += draw('.', cx); cx += draw('6', cx);
-        cx += wordGap;
-        cx += draw('p', cx); cx += draw('l', cx); cx += draw('u', cx); cx += draw('s', cx);
+        // (Placa de texto voxel removida para usar a placa padrão)
 
         // === 💡 ILUMINAÇÃO & DETALHES ===
         // Faixas verticais de neon nas torres
@@ -165,5 +160,6 @@
             size: { w: 20, h: 75, d: 16 },
             name: "Torre Qwen 3.6 Plus"
         });
+        renderStandardSign('TORRE QWEN', 'Qwen 3.6 Plus');
     };
 })();
