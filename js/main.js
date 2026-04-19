@@ -447,11 +447,12 @@ function update() {
         } else {
             let offset;
             if (gameState.currentVehicle === heli) {
-                offset = new THREE.Vector3(0, 5, 10).applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+                // Zoom para o Helicóptero (Z=10, Y=5 como base)
+                offset = new THREE.Vector3(0, 5 * cameraZoom, 10 * cameraZoom).applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
             } else {
                 const bX = Math.sin(yaw), bZ = Math.cos(yaw);
-                // Aumentando a distância (de 10 para 16) e altura (de 5 para 8)
-                offset = new THREE.Vector3(bX * 16, 8, bZ * 16).applyAxisAngle(new THREE.Vector3(bZ, 0, -bX), -pitch);
+                // Zoom para o Carro (Distância 16, Altura 8 como base)
+                offset = new THREE.Vector3(bX * 16 * cameraZoom, 8 * cameraZoom, bZ * 16 * cameraZoom).applyAxisAngle(new THREE.Vector3(bZ, 0, -bX), -pitch);
             }
             camera.position.copy(vMesh.position).add(offset);
             const lookTarget = vMesh.position.clone();
