@@ -404,35 +404,6 @@
             ctx.collidables.push(new THREE.Box3().setFromObject(bench));
         });
 
-        // === PLAQUINHA - Agente Kimi 2.5 ===
-        // Criar textura com texto usando canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 128;
-        const context = canvas.getContext('2d');
-        context.fillStyle = '#1a3a5c';
-        context.fillRect(0, 0, 512, 128);
-        context.fillStyle = '#ffffff';
-        context.font = 'bold 48px Arial, sans-serif';
-        context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        context.fillText('Agente Kimi 2.5', 256, 64);
-        // Borda dourada
-        context.strokeStyle = '#ffd700';
-        context.lineWidth = 8;
-        context.strokeRect(4, 4, 504, 120);
-
-        const signTexture = new THREE.CanvasTexture(canvas);
-        const matPlaca = new THREE.MeshLambertMaterial({ map: signTexture });
-
-        // Poste da placa (na frente do prédio, ao lado da entrada)
-        const poste = ctx.createVoxel(cx - 9, 1.5, cz + 14, 0.5, 3, 0.5, matCinza);
-        ctx.collidables.push(new THREE.Box3().setFromObject(poste));
-
-        // Placa propriamente dita - virada para quem chega
-        const placa = ctx.createVoxel(cx - 9, 3.5, cz + 14, 5, 1.5, 0.3, matPlaca);
-        ctx.collidables.push(new THREE.Box3().setFromObject(placa));
-
         // === REGISTRAR NO MINIMAPA ===
         if (ctx.buildings) {
             ctx.buildings.push({
@@ -445,6 +416,6 @@
             });
         }
 
-        renderStandardSign('Biblioteca Tianjin Binhai', 'KIMI k2.5');
+        renderStandardSign('Biblioteca Tianjin Binhai', 'Agente KIMI k2.5');
     };
 })();

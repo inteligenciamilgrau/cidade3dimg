@@ -144,24 +144,7 @@
             ctx.createVoxel(px, 6.5, pz, 1, 0.5, 1, matLuz);
         });
 
-        // === PLAQUINHA "Claude Opus 4.6" ===
-        let signCanvas = document.createElement('canvas');
-        signCanvas.width = 256; signCanvas.height = 64;
-        let signCtx = signCanvas.getContext('2d');
-        signCtx.fillStyle = '#1a1a2e';
-        signCtx.fillRect(0, 0, 256, 64);
-        signCtx.fillStyle = '#e94560';
-        signCtx.font = 'bold 28px Arial';
-        signCtx.textAlign = 'center';
-        signCtx.textBaseline = 'middle';
-        signCtx.fillText('Claude Opus 4.6', 128, 32);
-        let signTex = new ctx.THREE.CanvasTexture(signCanvas);
-        let signMat = new ctx.THREE.MeshBasicMaterial({ map: signTex });
-        // Poste da placa
-        ctx.createVoxel(cx + 12, 2, cz + 12, 0.3, 4, 0.3, matPoste);
-        // Placa em si
-        let placa = ctx.createVoxel(cx + 12, 4.5, cz + 12, 4, 1, 0.2, signMat);
-        ctx.collidables.push(new ctx.THREE.Box3().setFromObject(placa));
+        // (Placa de texto removida - usando placa padrão)
         renderStandardSign('MUSEU DE ARTE', 'Claude Opus 4.6');
     };
 })();

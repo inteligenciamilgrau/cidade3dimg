@@ -155,30 +155,8 @@
         createSolid(cx + 8, 41, cz, 2, 4, 2, C_FIRE, 'Basic'); // Fogo
         createSolid(cx - 6, 26, cz + 4, 4, 6, 2, C_COPPER); // Tábua
 
-        // === 6. PLACA (CORRIGIDA) ===
-        const cvs = document.createElement('canvas');
-        cvs.width = 512; cvs.height = 256;
-        const c2 = cvs.getContext('2d');
+        // (Placa antiga do Gemini removida - usando placa padrão)
 
-        c2.fillStyle = '#FFCC00'; c2.fillRect(0, 0, 512, 256); // Fundo
-        c2.lineWidth = 20; c2.strokeStyle = '#000000'; c2.strokeRect(0, 0, 512, 256); // Borda
-        c2.font = '900 80px Arial Black'; c2.fillStyle = '#000000';
-        c2.textAlign = 'center'; c2.textBaseline = 'middle';
-        c2.fillText("GEMINI", 256, 100);
-        c2.fillText("3.1 PRO", 256, 190);
-
-        const signMat = new ctx.THREE.MeshBasicMaterial({ map: new ctx.THREE.CanvasTexture(cvs) });
-
-        // A Placa em si (Z = 12.6)
-        const sign = ctx.createVoxel(cx + 10, 4, cz + 12.6, 6, 3, 0.2, signMat);
-        sign.rotation.x = -0.2;
-        sign.rotation.y = -0.4;
-        ctx.collidables.push(new ctx.THREE.Box3().setFromObject(sign));
-
-        // HASTE CORRIGIDA:
-        // Movida para Z = 12.0 (ATRÁS da placa)
-        // Mais fina (0.5) para não aparecer nas bordas
-        createSolid(cx + 10, 2, cz + 12.0, 0.5, 4, 0.5, C_STONE);
 
         initElevator();
         renderStandardSign('Estátua da Liberdade', 'GEMINI 3.1 PRO');
