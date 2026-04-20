@@ -29,12 +29,6 @@ Lin5   │ 1_5    │ 2_5    │ 3_5    │ 4_5    │ 5_5    │ Z=80
 
 ---
 
-### 📍 Landmarks Modulares Atuais:
-- **1_1**: Estação Corcovado (Base do Cristo Redentor)
-- **2_1**: Estação Pão de Açúcar (Ponto inicial do Bondinho)
-- **3_2**: Heliporto (O helicóptero volta para cá automaticamente)
-- **5_5**: Parque do Lago (Lago arredondado, Ponte e Pato)
-- **3_3**: Spawn / Centro da Cidade
 
 ### 🧠 Diretrizes para IAs (Manifesto de Construção)
 Se você é uma IA criando um novo quarteirão, siga estes princípios para garantir uma experiência premium:
