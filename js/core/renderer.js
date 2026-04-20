@@ -10,10 +10,12 @@ scene.background = new THREE.Color(0x87CEEB); // Céu azul
 
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-export const renderer = new THREE.WebGLRenderer({ antialias: false }); // Voxel look
+export const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limita pixel ratio (salva GPU)
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.sortObjects = true;
 document.body.appendChild(renderer.domElement);
 
 export const clock = new THREE.Clock();

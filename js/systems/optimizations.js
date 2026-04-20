@@ -1,62 +1,86 @@
 // =====================================================================
-// systems/optimizations.js — Culling de Frustum e Oclusão em Nível de Bloco
+// systems/optimizations.js — Backface Culling + Frustum Culling por Bloco
 // =====================================================================
-import { THREE, camera } from '../core/renderer.js';
+import { THREE, scene, camera } from '../core/renderer.js';
 import { blockGroups } from '../world/city.js';
 import * as CONFIG from '../config.js';
 
+// === Frustum reutilizável ===
 const frustum = new THREE.Frustum();
 const projScreenMatrix = new THREE.Matrix4();
-const blockBounds = new Map();
 
-/**
- * Inicializa as bounding boxes de cada bloco para otimização futura.
- * Deve ser chamado APÓS buildCity().
- */
+// === Dados pré-calculados por bloco ===
+const blockData = []; // { group, box, center }
+
+// =====================================================================
+//  INICIALIZAÇÃO (chamada uma vez após buildCity)
+// =====================================================================
 export function initOptimizations() {
     if (!CONFIG.OPTIMIZATION_ENABLED) return;
-    
-    blockGroups.forEach(group => {
-        if (group.children.length > 0) {
-            const box = new THREE.Box3().setFromObject(group);
-            blockBounds.set(group, box);
+
+    let meshCount = 0;
+
+    // --- BACKFACE CULLING: Forçar FrontSide em materiais opacos ---
+    scene.traverse(obj => {
+        if (obj.isMesh) {
+            meshCount++;
+            if (obj.material) {
+                if (Array.isArray(obj.material)) {
+                    obj.material.forEach(m => {
+                        if (!m.transparent) m.side = THREE.FrontSide;
+                    });
+                } else {
+                    if (!obj.material.transparent) obj.material.side = THREE.FrontSide;
+                }
+            }
+            // Frustum culling nativo por mesh (já é default, mas garante)
+            obj.frustumCulled = true;
+            // Pré-calcula bounding sphere para frustum check mais rápido
+            if (obj.geometry && !obj.geometry.boundingSphere) {
+                obj.geometry.computeBoundingSphere();
+            }
         }
     });
-    console.log(`[Otimização] ${blockGroups.length} blocos monitorados para culling.`);
+
+    // --- Pré-calcula bounding box dos grupos de blocos ---
+    blockGroups.forEach(group => {
+        if (group.children.length === 0) return;
+        const box = new THREE.Box3().setFromObject(group);
+        const center = box.getCenter(new THREE.Vector3());
+        blockData.push({ group, box, center });
+    });
+
+    console.log(
+        `[Otimização] ${meshCount} meshes (backface culling) | ` +
+        `${blockData.length} blocos (frustum culling)`
+    );
 }
 
-/**
- * Executa o culling de frustum e distância em cada frame.
- */
+// =====================================================================
+//  UPDATE POR FRAME — Só frustum + distância, sem tocar em sombra/fog
+// =====================================================================
 export function updateOptimizations() {
     if (!CONFIG.OPTIMIZATION_ENABLED) return;
 
-    // Atualiza a matriz do frustum da câmera
+    // Atualiza frustum da câmera
+    camera.updateMatrixWorld();
     projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
     frustum.setFromProjectionMatrix(projScreenMatrix);
 
-    const playerPos = camera.position;
+    const camPos = camera.position;
     const viewDistSq = CONFIG.VIEW_DISTANCE * CONFIG.VIEW_DISTANCE;
 
-    blockGroups.forEach(group => {
-        const box = blockBounds.get(group);
-        if (!box) return;
+    for (let i = 0; i < blockData.length; i++) {
+        const bd = blockData[i];
 
-        // 1. DISTANCE CULLING (Oclusão Simplificada/Neblina)
-        const center = box.getCenter(new THREE.Vector3());
-        const distSq = center.distanceToSquared(playerPos);
-        
+        // Distance culling — longe demais? Esconde o grupo inteiro
+        const distSq = bd.center.distanceToSquared(camPos);
         if (distSq > viewDistSq) {
-            group.visible = false;
-            return;
+            bd.group.visible = false;
+            continue;
         }
 
-        // 2. FRUSTUM CULLING
-        // Verifica se a bounding box do bloco intersecta o que a câmera vê
-        if (frustum.intersectsBox(box)) {
-            group.visible = true;
-        } else {
-            group.visible = false;
-        }
-    });
+        // Frustum culling — fora do campo de visão? Esconde
+        bd.group.visible = frustum.intersectsBox(bd.box);
+    }
 }
