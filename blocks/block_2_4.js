@@ -32,7 +32,7 @@
         function createVoxel(x, y, z, w, h, d, material, isCollidable = false) {
             const absX = ctx.centerX + x;
             const absZ = ctx.centerZ + z;
-            const mesh = ctx.createVoxel(absX, y, absZ, w, h, d, material);
+            const mesh = ctx.createVoxel(absX, y, absZ, w, h, d, material, true, true, ctx.parent);
 
             if (isCollidable) {
                 ctx.collidables.push(new ctx.THREE.Box3().setFromObject(mesh));

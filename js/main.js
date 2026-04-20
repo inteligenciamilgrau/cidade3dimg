@@ -24,6 +24,7 @@ import { createExplosion, updateParticles } from './systems/collisions.js';
 import { pickNewMission, checkMission, tickTimer } from './systems/mission.js';
 import { drawMinimap } from './systems/minimap.js';
 import { updateDayNight, dayTime } from './systems/dayNight.js';
+import { initOptimizations, updateOptimizations } from './systems/optimizations.js';
 
 // ---- UI ----
 import { health, updateHealthDisplay, gameOver, setupTimerToggle } from './ui/hud.js';
@@ -58,6 +59,7 @@ const velocity = new THREE.Vector3();
 
 // ---- Construção do mundo ----
 buildCity();
+initOptimizations();
 
 // ---- Player ----
 const player = new THREE.Group();
@@ -579,6 +581,7 @@ function update() {
 
     checkMission(gameState.currentVehicle ? (gameState.currentVehicle.mesh || gameState.currentVehicle) : player, gameState, null);
     drawMinimap(gameState.currentVehicle ? (gameState.currentVehicle.mesh || gameState.currentVehicle) : player, yaw);
+    updateOptimizations();
 }
 
 function animate() {

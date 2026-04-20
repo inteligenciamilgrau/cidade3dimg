@@ -26,3 +26,7 @@ export const GAME_TIME_START = 600; // 10 minutos
 export const NPC_COUNT = 30;
 export const NPC_SPECIALS = 5;
 export const CAR_COUNT = 15;
+
+// Performance / Otimização
+export const VIEW_DISTANCE = 320;
+export const OPTIMIZATION_ENABLED = true;

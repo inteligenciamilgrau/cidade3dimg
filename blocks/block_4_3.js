@@ -33,7 +33,7 @@
 
         // A função mágica que causou o sumiço da placa
         function vox(x, y, z, w, h, d, mat, collide = true) {
-            const mesh = ctx.createVoxel(cx + x, y, cz + z, w, h, d, mat);
+            const mesh = ctx.createVoxel(cx + x, y, cz + z, w, h, d, mat, true, true, ctx.parent);
             if (collide) ctx.collidables.push(new THREE.Box3().setFromObject(mesh));
             return mesh;
         }
@@ -174,7 +174,7 @@
         }
 
         function initElevator() {
-            const platform = ctx.createVoxel(cx, 7.7, cz, 3.2, 0.2, 3.2, matGold);
+            const platform = ctx.createVoxel(cx, 7.7, cz, 3.2, 0.2, 3.2, matGold, true, true, ctx.parent);
             const elBox = new THREE.Box3().setFromObject(platform);
             ctx.collidables.push(elBox);
 
@@ -293,7 +293,7 @@
             vox(pX - 2.2, 1.8, pZ, 0.22, 2.8, 0.22, matDark);
             vox(pX + 2.2, 1.8, pZ, 0.22, 2.8, 0.22, matDark);
             vox(pX, 3.5, pZ, 5.2, 1.8, 0.22, matDark);
-            vox(pX, 3.5, pZ + 0.12, 5.2, 1.8, 0.05, signMat);
+            vox(pX, 3.5, pZ + 0.12, 5.2, 1.8, 0.05, signMat, false);
         }
 
         renderStandardSign('Estátua da Liberdade (V2)', 'GEMINI 3.1 PRO');

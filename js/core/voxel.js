@@ -13,14 +13,15 @@ const geomBox = new THREE.BoxGeometry(1, 1, 1);
  * @param {THREE.Material} mat
  * @param {boolean} castShadow
  * @param {boolean} receiveShadow
+ * @param {THREE.Object3D} parent - (Opcional) Container pai
  */
-export function createVoxel(x, y, z, w, h, d, mat, castShadow = true, receiveShadow = true) {
+export function createVoxel(x, y, z, w, h, d, mat, castShadow = true, receiveShadow = true, parent = scene) {
     const mesh = new THREE.Mesh(geomBox, mat);
     mesh.position.set(x, y, z);
     mesh.scale.set(w, h, d);
     mesh.castShadow = castShadow;
     mesh.receiveShadow = receiveShadow;
-    scene.add(mesh);
+    parent.add(mesh);
     return mesh;
 }
 
